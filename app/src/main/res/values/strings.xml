@@ -1,4 +1,10 @@
 <resources>
     <string name="app_name">Temperature Converter</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_celsius_to__farenheit">Celsius to Farenheit</string>
+    <string name="title_activity_farenheit_to__celsius">Farenheit to Celsius</string>
+    <string name="title_activity_celsius_to__kelvin">Celsius to Kelvin</string>
+    <string name="title_activity_kelvin_to__celsius">Kelvin to Celsius</string>
+    <string name="title_activity_kelvin_to__farenheit">Kelvin to Farenheit</string>
+    <string name="title_activity_farenheit_to__kelvin">Farenheit to Kelvin</string>
 </resources>

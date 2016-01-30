@@ -18,6 +18,30 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".Celsius_to_Farenheit"
+            android:label="@string/title_activity_celsius_to__farenheit"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Farenheit_to_Celsius"
+            android:label="@string/title_activity_farenheit_to__celsius"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Celsius_to_Kelvin"
+            android:label="@string/title_activity_celsius_to__kelvin"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Kelvin_to_Celsius"
+            android:label="@string/title_activity_kelvin_to__celsius"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Kelvin_to_Farenheit"
+            android:label="@string/title_activity_kelvin_to__farenheit"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Farenheit_to_Kelvin"
+            android:label="@string/title_activity_farenheit_to__kelvin"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
