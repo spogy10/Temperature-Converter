@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.jr.poliv.temperatureconverter.Farenheit_to_Kelvin">
+    tools:context="com.jr.poliv.temperatureconverter.Fahrenheit_to_Celsius">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
@@ -21,7 +21,7 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_farenheit_to__kelvin" />
+    <include layout="@layout/content_fahrenheit_to__celsius" />
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
