@@ -12,4 +12,34 @@
     tools:context="com.jr.poliv.temperatureconverter.Kelvin_to_Celsius"
     tools:showIn="@layout/activity_kelvin_to__celsius">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:inputType="number|numberSigned|numberDecimal"
+        android:hint="Kelvin"
+        android:ems="10"
+        android:id="@+id/editText"
+        android:layout_marginTop="63dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/textView"
+        android:layout_below="@+id/editText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        android:background="@android:color/background_light" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/convert"
+        android:id="@+id/button"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="133dp" />
+
 </RelativeLayout>
