@@ -21,27 +21,33 @@
         <activity
             android:name=".Celsius_to_Fahrenheit"
             android:label="@string/title_activity_celsius_to__fahrenheit"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity"  />
         <activity
             android:name=".Fahrenheit_to_Celsius"
             android:label="@string/title_activity_fahrenheit_to__celsius"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Celsius_to_Kelvin"
             android:label="@string/title_activity_celsius_to__kelvin"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Kelvin_to_Celsius"
             android:label="@string/title_activity_kelvin_to__celsius"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Kelvin_to_Fahrenheit"
             android:label="@string/title_activity_kelvin_to__fahrenheit"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".Fahrenheit_to_Kelvin"
             android:label="@string/title_activity_fahrenheit_to__kelvin"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity" />
         <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
              App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
         <meta-data

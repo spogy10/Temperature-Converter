@@ -19,6 +19,8 @@ public class Fahrenheit_to_Celsius extends Celsius_to_Fahrenheit {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Button button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -26,7 +28,7 @@ public class Fahrenheit_to_Celsius extends Celsius_to_Fahrenheit {
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow((null == getCurrentFocus()) ? null : getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 
-                display(F_to_C(acceptvar()), 'C');
+                display(F_to_C(acceptvar()), '°', 'C');
             }
         });
 
