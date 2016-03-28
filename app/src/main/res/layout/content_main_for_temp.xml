@@ -9,8 +9,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.jr.poliv.temperatureconverter.MainActivity"
-    tools:showIn="@layout/activity_main">
+    tools:context=".MainActivity_for_Temp"
+    tools:showIn="@layout/activity_main_for_temp">
 
     <View android:id="@+id/fakeView"
         android:layout_width="0dp"

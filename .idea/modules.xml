@@ -5,7 +5,6 @@
       <module fileurl="file://$PROJECT_DIR$/libraries/InfofromNet/InfofromNet.iml" filepath="$PROJECT_DIR$/libraries/InfofromNet/InfofromNet.iml" />
       <module fileurl="file://$PROJECT_DIR$/TemperatureConverter.iml" filepath="$PROJECT_DIR$/TemperatureConverter.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/currency_converter/currency_converter.iml" filepath="$PROJECT_DIR$/currency_converter/currency_converter.iml" />
       <module fileurl="file://$PROJECT_DIR$/libraries/libraries.iml" filepath="$PROJECT_DIR$/libraries/libraries.iml" />
     </modules>
   </component>

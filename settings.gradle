@@ -1,1 +1,1 @@
-include ':app', ':currency_converter'
+include ':app'

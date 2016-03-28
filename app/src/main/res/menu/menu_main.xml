@@ -1,10 +1,15 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.jr.poliv.temperatureconverter.MainActivity">
+    tools:context=".Currency_Converter">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/update_exchange_rate"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="@string/update_exchange_rate"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/display_exchange_rate"
+        android:orderInCategory="101"
+        android:title="@string/display_exchange_rate"
+        app:showAsAction="never"/>
 </menu>

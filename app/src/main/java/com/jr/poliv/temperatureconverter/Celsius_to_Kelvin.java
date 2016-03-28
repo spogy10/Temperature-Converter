@@ -22,6 +22,7 @@ public class Celsius_to_Kelvin extends Celsius_to_Fahrenheit {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         Button button = (Button) findViewById(R.id.button);
+        assert button != null;
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

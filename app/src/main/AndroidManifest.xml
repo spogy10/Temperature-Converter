@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jr.poliv.temperatureconverter">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,7 +12,59 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".MainActivity_for_Temp"
+            android:label="@string/title_main_activity_for_temp"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity">
+
+        </activity>
+        <activity
+            android:name=".Celsius_to_Fahrenheit"
+            android:label="@string/title_activity_celsius_to__fahrenheit"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Fahrenheit_to_Celsius"
+            android:label="@string/title_activity_fahrenheit_to__celsius"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Celsius_to_Kelvin"
+            android:label="@string/title_activity_celsius_to__kelvin"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Kelvin_to_Celsius"
+            android:label="@string/title_activity_kelvin_to__celsius"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Kelvin_to_Fahrenheit"
+            android:label="@string/title_activity_kelvin_to__fahrenheit"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Fahrenheit_to_Kelvin"
+            android:label="@string/title_activity_fahrenheit_to__kelvin"
+            android:parentActivityName=".MainActivity_for_Temp"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <!--
+             ATTENTION: This was auto-generated to add Google Play services to your project for
+             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information.
+        -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name=".Currency_Converter"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:parentActivityName=".MainActivity"/>
+        <activity
             android:name=".MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -18,41 +73,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".Celsius_to_Fahrenheit"
-            android:label="@string/title_activity_celsius_to__fahrenheit"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity"  />
-        <activity
-            android:name=".Fahrenheit_to_Celsius"
-            android:label="@string/title_activity_fahrenheit_to__celsius"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".Celsius_to_Kelvin"
-            android:label="@string/title_activity_celsius_to__kelvin"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".Kelvin_to_Celsius"
-            android:label="@string/title_activity_kelvin_to__celsius"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".Kelvin_to_Fahrenheit"
-            android:label="@string/title_activity_kelvin_to__fahrenheit"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity" />
-        <activity
-            android:name=".Fahrenheit_to_Kelvin"
-            android:label="@string/title_activity_fahrenheit_to__kelvin"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:parentActivityName=".MainActivity" />
-        <!-- ATTENTION: This was auto-generated to add Google Play services to your project for
-             App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
     </application>
 
 </manifest>
