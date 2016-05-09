@@ -31,6 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -39,7 +43,9 @@ public class Currency_Converter extends AppCompatActivity {
     public String dataFromAsyncTask = "0";
     public String folder_name;
     public String file_name;
+    public String date_last_updated;
     double exchangeRate = 0;
+    SimpleDateFormat dateFormat;
     EditText editText, editText2;
     DialogFragment dialog = new OkDialog();
     SharedPreferences file;
@@ -66,8 +72,10 @@ public class Currency_Converter extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
+        dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         folder_name = getString(com.jr.poliv.temperatureconverter.R.string.folder_name);
         file_name = getString(com.jr.poliv.temperatureconverter.R.string.file_name);
+        date_last_updated = getString(R.string.date_last_updated);
         editText = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText);
         editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText2);
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
@@ -77,6 +85,7 @@ public class Currency_Converter extends AppCompatActivity {
             Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
         else {
             exchangeRate = Double.parseDouble(file.getString(file_name, "0"));
+            checkDate();
         }
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -277,6 +286,67 @@ public class Currency_Converter extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == com.jr.poliv.temperatureconverter.R.id.update_exchange_rate) {
+            update();
+            return true;
+        }
+
+        if (id == com.jr.poliv.temperatureconverter.R.id.display_exchange_rate) {
+
+            if (!file.contains(file_name))
+                Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+            else {
+                checkDate();
+                setDialog("US$1 = JA$ " + file.getString(file_name, "0"));
+            }
+
+
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    boolean checkDate(){
+
+        try {
+            Date lastCheck = dateFormat.parse(file.getString(date_last_updated, "01-01-2000"));
+            Calendar c = Calendar.getInstance();
+            c.setTime(lastCheck);
+            c.add(Calendar.DATE, 10);
+            lastCheck = new Date(c.getTimeInMillis());
+
+            if (new Date().after(lastCheck)){
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                if (networkInfo != null && networkInfo.isConnected()){
+                    DialogFragment newFragment = new UpdateDialog();
+                    newFragment.show(getFragmentManager(), "dialog");
+
+
+
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return true;
+    }
+
+    public void update(){
+
             ConnectivityManager connMgr = (ConnectivityManager)
                     getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
@@ -298,28 +368,19 @@ public class Currency_Converter extends AppCompatActivity {
                 if (Double.parseDouble(dataFromAsyncTask) != 0) {
                     exchangeRate = Double.parseDouble(dataFromAsyncTask);
                     Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
-                }
-                editor = file.edit();
-                if (editor.putString(file_name, dataFromAsyncTask).commit()) {
-                    Log.d("Paul", "written to file");
+
+                    Date current = new Date();
+                    editor = file.edit();
+                    if (editor.putString(file_name, dataFromAsyncTask).commit()) {
+                        Log.d("Paul", "written to file");
+                    }
+
+                    if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
+                        Log.d("Paul", "date written to file");
                 }
             } else
                 setDialog("No Network Connection");
-            return true;
-        }
 
-        if (id == com.jr.poliv.temperatureconverter.R.id.display_exchange_rate) {
-
-            if (!file.contains(file_name))
-                Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
-            else {
-                setDialog("US$1 = JA$ " + file.getString(file_name, "0"));
-            }
-
-
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public void setDialog(String message) {

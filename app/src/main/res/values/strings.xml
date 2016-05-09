@@ -19,6 +19,7 @@
     <string name="button_label">convert</string>
     <string name="folder_name">com.jr.poliv.temperatureconverter</string>
     <string name="file_name">com.jr.poliv.temperatureconverter.Exchange_Rate</string>
+    <string name= "date_last_updated">date last updated</string>
     <string name="title_activity_main">Currency Converter</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>

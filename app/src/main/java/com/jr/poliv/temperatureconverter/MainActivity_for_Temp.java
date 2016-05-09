@@ -5,8 +5,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -20,81 +24,188 @@ public class MainActivity_for_Temp extends AppCompatActivity {
      */
     private GoogleApiClient client;
 
+    EditText celsius, fahrenheit, kelvin;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_for_temp);
-        //Intent intent = new Intent(MainActivity_for_Temp.this, Currency_Converter.class);
-        //startActivity(intent);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        Button C_to_F = (Button) findViewById(R.id.C_to_F);
-        Button F_to_C = (Button) findViewById(R.id.F_to_C);
-        Button C_to_K = (Button) findViewById(R.id.C_to_K);
-        Button K_to_C = (Button) findViewById(R.id.K_to_C);
-        Button K_to_F = (Button) findViewById(R.id.K_to_F);
-        Button F_to_K = (Button) findViewById(R.id.F_to_K);
+        celsius = (EditText) findViewById(R.id.Celsius);
+        fahrenheit = (EditText) findViewById(R.id.Fahrenheit);
+        kelvin = (EditText) findViewById(R.id.Kelvin);
+        
 
-        assert C_to_F != null;
-        C_to_F.setOnClickListener(new View.OnClickListener() {
+        focusMethod(celsius, 3, "°C");
+
+        celsius.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Celsius_to_Fahrenheit.class);
-                startActivity(myIntent);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(celsius.isFocused())
+                    if (!( (celsius.getText().toString().equals("")) || (celsius.getText().toString().equals(".")) || (celsius.getText().toString().equals("+")) || (celsius.getText().toString().equals("-")) ))
+                    {
+                        exponentChecker(celsius);
+                        setFahrenheit("celsius");
+                        setKelvin("celsius");
+                    }
+
             }
         });
 
-        assert F_to_C != null;
-        F_to_C.setOnClickListener(new View.OnClickListener() {
+
+        focusMethod(fahrenheit, 3, "°F");
+
+        fahrenheit.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Fahrenheit_to_Celsius.class);
-                startActivity(myIntent);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+
+
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(fahrenheit.isFocused()) {
+                    if (!((fahrenheit.getText().toString().equals("")) || (fahrenheit.getText().toString().equals(".")) || (fahrenheit.getText().toString().equals("+")) || (fahrenheit.getText().toString().equals("-")))) {
+                            exponentChecker(fahrenheit);
+                            setCelsius("fahrenheit");
+                            setKelvin("fahrenheit");
+                    }
+                }
+
             }
         });
 
-        assert C_to_K != null;
-        C_to_K.setOnClickListener(new View.OnClickListener() {
+        focusMethod(kelvin, 2, "K");
+
+        kelvin.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Celsius_to_Kelvin.class);
-                startActivity(myIntent);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+                if(kelvin.isFocused())
+                    if (!( (kelvin.getText().toString().equals("")) || (kelvin.getText().toString().equals(".")) || (kelvin.getText().toString().equals("+")) || (kelvin.getText().toString().equals("-")) ))
+                    {
+                        exponentChecker(kelvin);
+                        setCelsius("kelvin");
+                        setFahrenheit("kelvin");
+                    }
+
             }
         });
 
-        assert K_to_C != null;
-        K_to_C.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Kelvin_to_Celsius.class);
-                startActivity(myIntent);
-            }
-        });
-
-        assert K_to_F != null;
-        K_to_F.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Kelvin_to_Fahrenheit.class);
-                startActivity(myIntent);
-            }
-        });
-
-        assert F_to_K != null;
-        F_to_K.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent myIntent = new Intent(MainActivity_for_Temp.this, Fahrenheit_to_Kelvin.class);
-                startActivity(myIntent);
-            }
-        });
 
 
 
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+
+    void setCelsius(String choice){
+
+        switch (choice) {
+            case "fahrenheit": celsius.setText(String.format("%s °C", Double.toString(Calc.F_to_C(Double.parseDouble(fahrenheit.getText().toString())))));
+                break;
+
+            case "kelvin": celsius.setText(String.format("%s °C", Double.toString(Calc.K_to_C(Double.parseDouble(kelvin.getText().toString())))));
+                break;
+        }
+
+    }
+
+    void setFahrenheit(String choice){
+
+        switch (choice) {
+
+            case "celsius": fahrenheit.setText(String.format("%s °F", Double.toString(Calc.C_to_F(Double.parseDouble(celsius.getText().toString())))));
+                break;
+
+            case "kelvin": fahrenheit.setText(String.format("%s °F", Double.toString(Calc.K_to_F(Double.parseDouble(kelvin.getText().toString())))));
+                break;
+
+        }
+
+    }
+
+    void setKelvin(String choice){
+
+        switch (choice) {
+
+            case "celsius": kelvin.setText(String.format("%s K", Double.toString(Calc.C_to_K(Double.parseDouble(celsius.getText().toString())))));
+                break;
+
+            case "fahrenheit": kelvin.setText(String.format("%s K", Double.toString(Calc.F_to_K(Double.parseDouble(fahrenheit.getText().toString())))));
+
+
+        }
+    }
+
+    void focusMethod(final EditText text, final int amountOfEndCharacters, final String endString){
+
+        text.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus){
+                    if (!(text.getText().toString().matches("[0-9.]*"))) {
+                        int length = text.getText().length();
+
+                        text.getText().delete(length - amountOfEndCharacters, length);
+                    }
+                }
+                else {
+                    text.setText(String.format("%s %s", text.getText().toString(), endString));
+                }
+
+            }
+        });
+    }
+
+    void exponentChecker(EditText text){
+
+
+        int length = text.getText().length();
+        String temp = text.getText().toString();
+        if( temp.substring(length - 1, length).equals("E"))
+            text.getText().delete(length - 1, length);
+
+        if( temp.substring(length - 1, length).equals("-"))
+            text.getText().delete(length - 2, length);
+
+
+
     }
 
 

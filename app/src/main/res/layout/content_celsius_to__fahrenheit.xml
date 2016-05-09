@@ -18,7 +18,7 @@
         android:inputType="number|numberSigned|numberDecimal"
         android:hint="Celsius"
         android:ems="10"
-        android:id="@+id/editText"
+        android:id="@+id/Celsius"
         android:layout_marginTop="63dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" />
