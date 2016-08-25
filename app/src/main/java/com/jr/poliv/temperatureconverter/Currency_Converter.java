@@ -390,7 +390,7 @@ public class Currency_Converter extends AppCompatActivity {
         dialog.show(getFragmentManager(), "");
     }
 
-    public class OkDialog extends DialogFragment {
+    public static class OkDialog extends DialogFragment {
         public OkDialog() {
 
         }
