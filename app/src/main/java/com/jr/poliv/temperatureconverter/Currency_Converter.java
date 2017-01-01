@@ -202,10 +202,20 @@ public class Currency_Converter extends AppCompatActivity {
                 "                          </tr>\n" +
                 "                          \n" +
                 "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">";
-        string = string.substring(string.indexOf(intro));
-        return string.substring(intro.length(), intro.length() + 8);
-    }
 
+        String intro2 = "<b>10-DAY MOVING AVERAGE RATE</b></td>\n" +
+                "                          </tr>\n" +
+                "                          <tr>\n" +
+                "                            <td><b>CURRENCY</b></td>\n" +
+                "                            <td align=\"center\" width=\"256px\"><b>PURCHASE</b></td>\n" +
+                "                            <td align=\"center\" width=\"198px\"><b>SALES</b></td>\n" +
+                "                          </tr>\n" +
+                "                          \n" +
+                "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">127.6632</td><td align=\"right\">";
+
+    string = string.substring(string.indexOf(intro));
+    return string.substring(intro2.length(), intro2.length() + 8);
+}
     @Override
     public void onStart() {
         super.onStart();
