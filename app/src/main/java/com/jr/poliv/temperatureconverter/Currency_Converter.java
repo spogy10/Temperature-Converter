@@ -26,6 +26,9 @@ import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,8 +44,9 @@ import java.util.concurrent.TimeoutException;
 
 public class Currency_Converter extends AppCompatActivity {
     public String dataFromAsyncTask = "0";
+    public Currency[] currencies = null;
     public String folder_name;
-    public String file_name;
+
     public String date_last_updated;
     double exchangeRate = 0;
     SimpleDateFormat dateFormat;
@@ -74,17 +78,17 @@ public class Currency_Converter extends AppCompatActivity {
 
         dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         folder_name = getString(com.jr.poliv.temperatureconverter.R.string.folder_name);
-        file_name = getString(com.jr.poliv.temperatureconverter.R.string.file_name);
+
         date_last_updated = getString(R.string.date_last_updated);
         editText = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText);
         editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText2);
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
 
 
-        if (!file.contains(file_name))
+        if (!file.contains("JMD"))
             Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
         else {
-            exchangeRate = Double.parseDouble(file.getString(file_name, "0"));
+            exchangeRate = Double.parseDouble(file.getString("JMD", "0"));
             checkDate();
         }
 
@@ -183,6 +187,62 @@ public class Currency_Converter extends AppCompatActivity {
         }
     }
 
+    public void getExchangeRates() throws IOException{
+        InputStream is = null;
+        try{
+            URL url = new URL("http://api.fixer.io/latest?base=USD");
+            HttpURLConnection in = (HttpURLConnection) url.openConnection();
+            in.setReadTimeout(10000 /* milliseconds */);
+            in.setConnectTimeout(15000 /* milliseconds */);
+            in.setRequestMethod("GET");
+            in.setDoInput(true);
+            in.connect();
+            Log.d("Paul", "The response is: " + in.getResponseCode());
+            is = in.getInputStream();
+            String output = IOUtils.toString(is, "UTF-8");
+            //Log.d("Paul", output);
+
+            getCurrencies(output);
+
+
+        } finally{
+            if (is != null)
+                is.close();
+        }
+    }
+
+    public  void getCurrencies(String result){
+        try {
+            JSONObject jObject = new JSONObject(result);
+            JSONObject j2 = new JSONObject(jObject.getString("rates"));
+
+            JSONArray names = j2.names();
+
+            Currency[] currencies = new Currency[names.length()];
+
+            for(int i = 0; i < names.length(); i++){
+                currencies[i] = new Currency(names.getString(i).toString(), Double.parseDouble(j2.getString(names.getString(i).toString())));
+                Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i).toString() + " = " + j2.getString(names.getString(i).toString()));
+            }
+
+
+
+            setCurrencies(currencies);
+
+
+            //String aJsonString = j2.getString("BRL");
+            //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(0).toString()); //returns first currency name
+        } catch (JSONException e) {
+            Log.d("Paul", "THIS IS NOT THE STRING"+e.toString());
+            e.printStackTrace();
+        }
+
+    }
+
+    public void setCurrencies(Currency[] currencies){
+        this.currencies = currencies;
+    }
+
 //    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
 //        Reader reader;
 //        reader = new InputStreamReader(stream, "UTF-8");
@@ -216,6 +276,24 @@ public class Currency_Converter extends AppCompatActivity {
     string = string.substring(string.indexOf(intro));
     return string.substring(intro2.length(), intro2.length() + 8);
 }
+
+    public void saveExchangeRate(Currency dollar){ //saves currency to file
+        editor = file.edit();
+        if (editor.putString(dollar.getCurrency(), String.valueOf(dollar.getRate())).commit()) {
+            Log.d("Paul", dollar.getCurrency() + " = " + dollar.getRate() + " has been written to file");
+        }
+    }
+
+    public Currency getExchangeRate(String currency){
+
+        Currency dollar = new Currency();
+
+        if (file.contains(currency)){
+            dollar.setCurrency(currency);
+            dollar.setRate(Double.parseDouble(file.getString(currency, "0")));
+        }
+        return dollar;
+    }
     @Override
     public void onStart() {
         super.onStart();
@@ -261,12 +339,18 @@ public class Currency_Converter extends AppCompatActivity {
 
         @Override
         protected String doInBackground(Object[] params) {
-            try {
-                return getInfoFromWebsite();
+            try{
+                String JMD = getInfoFromWebsite();
+                Currency ja = new Currency("JMD", Double.parseDouble(JMD));
+                saveExchangeRate(ja);
+                getExchangeRates();
+                return "true";
+
+
 
             } catch (IOException e) {
                 Log.d("Paul", "nah it didn't work");
-                return "It didn't work";
+                return "false";
             }
 
         }
@@ -302,11 +386,11 @@ public class Currency_Converter extends AppCompatActivity {
 
         if (id == com.jr.poliv.temperatureconverter.R.id.display_exchange_rate) {
 
-            if (!file.contains(file_name))
+            if (!file.contains("JMD"))
                 Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
             else {
                 checkDate();
-                setDialog("US$1 = JA$ " + file.getString(file_name, "0"));
+                setDialog("US$1 = JA$ " + file.getString("JMD", "0"));
             }
 
 
@@ -373,20 +457,23 @@ public class Currency_Converter extends AppCompatActivity {
                     setDialog("System Timed Out");
                     Log.d("Paul", String.valueOf(e));
                 }
-                Log.d("Paul", "The file name is " + file_name);
+                Log.d("Paul", "The file name is " + "JMD");
                 Log.d("Paul", "Exchange rate is " + dataFromAsyncTask);
-                if (Double.parseDouble(dataFromAsyncTask) != 0) {
-                    exchangeRate = Double.parseDouble(dataFromAsyncTask);
+                if (dataFromAsyncTask.equals("true")) {
+                    exchangeRate = Double.parseDouble(file.getString("JMD", "0"));
                     Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
 
                     Date current = new Date();
                     editor = file.edit();
-                    if (editor.putString(file_name, dataFromAsyncTask).commit()) {
-                        Log.d("Paul", "written to file");
-                    }
 
                     if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
                         Log.d("Paul", "date written to file");
+                }
+
+                if (currencies != null){
+                    for (Currency currency : currencies)
+                        saveExchangeRate(currency);
+                    currencies = null;
                 }
             } else
                 setDialog("No Network Connection");
