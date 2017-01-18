@@ -18,26 +18,29 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -49,8 +52,13 @@ public class Currency_Converter extends AppCompatActivity {
 
     public String date_last_updated;
     double exchangeRate = 0;
+    public String currency1, currency2; // TODO: make currency display text into drop-down list populated by the currencies in the file
+    // TODO: use a method tht changes the exchange rate on drop-down change also save the new currencies into these variables
+    // TODO: store current selected currencies in the file and load them into the variables upon start up
     SimpleDateFormat dateFormat;
     EditText editText, editText2;
+    Spinner list,list2;
+    ArrayAdapter<String> listAdapter;
     DialogFragment dialog = new OkDialog();
     SharedPreferences file;
     SharedPreferences.Editor editor;
@@ -74,7 +82,11 @@ public class Currency_Converter extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        currency1 = "JMD"; currency2 = "USD";
+
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
 
         dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         folder_name = getString(com.jr.poliv.temperatureconverter.R.string.folder_name);
@@ -82,13 +94,15 @@ public class Currency_Converter extends AppCompatActivity {
         date_last_updated = getString(R.string.date_last_updated);
         editText = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText);
         editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText2);
+        list = (Spinner) findViewById(R.id.list);
+        list2 = (Spinner) findViewById(R.id.list2);
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
 
-
-        if (!file.contains("JMD"))
+        if (!file.contains("USD"))
             Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
         else {
-            exchangeRate = Double.parseDouble(file.getString("JMD", "0"));
+            updateExchangeRate();
+            populateDropDownList();
             checkDate();
         }
 
@@ -109,7 +123,7 @@ public class Currency_Converter extends AppCompatActivity {
                 else
                 if(editText.isFocused())
                     if (!( (editText.getText().toString().equals("")) || (editText.getText().toString().equals(".")) ))
-                        setUS();
+                        setCurr2();
             }
 
         });
@@ -131,7 +145,7 @@ public class Currency_Converter extends AppCompatActivity {
                 else
                 if(editText2.isFocused())
                     if (!( (editText2.getText().toString().equals("")) || (editText2.getText().toString().equals(".")) ))
-                        setJA();
+                        setCurr1();
             }
 
         });
@@ -146,20 +160,30 @@ public class Currency_Converter extends AppCompatActivity {
 
     }
 
-    public double jaToUs(double ja) {
-        return ja / exchangeRate;
+    public double curr1ToCurr2(double curr1) {
+        return curr1 / exchangeRate;
     }
 
-    public double usTOJa(double us) {
-        return us * exchangeRate;
+    public double curr2ToCurr1(double curr2) {
+        return curr2 * exchangeRate;
     }
 
-    public void setUS() {
-        editText2.setText(String.format("%.2f", jaToUs(Double.parseDouble(editText.getText().toString()))));
+    public void setCurr2() {
+        editText2.setText(String.format("%.2f", curr1ToCurr2(Double.parseDouble(editText.getText().toString()))));
     }
 
-    public void setJA() {
-        editText.setText(String.format("%.2f", usTOJa(Double.parseDouble(editText2.getText().toString()))));
+    public void setCurr1() {
+        editText.setText(String.format("%.2f", curr2ToCurr1(Double.parseDouble(editText2.getText().toString()))));
+    }
+
+    public void setCurrency1(String currency){
+        currency1 = currency;
+        updateExchangeRate();
+    }
+
+    public void setCurrency2(String currency){
+        currency2 = currency;
+        updateExchangeRate();
     }
 
     public String getInfoFromWebsite() throws IOException {
@@ -222,7 +246,7 @@ public class Currency_Converter extends AppCompatActivity {
 
             for(int i = 0; i < names.length(); i++){
                 currencies[i] = new Currency(names.getString(i).toString(), Double.parseDouble(j2.getString(names.getString(i).toString())));
-                Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i).toString() + " = " + j2.getString(names.getString(i).toString()));
+                //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i).toString() + " = " + j2.getString(names.getString(i).toString()));
             }
 
 
@@ -341,8 +365,9 @@ public class Currency_Converter extends AppCompatActivity {
         protected String doInBackground(Object[] params) {
             try{
                 String JMD = getInfoFromWebsite();
-                Currency ja = new Currency("JMD", Double.parseDouble(JMD));
+                Currency ja = new Currency("JMD", (1/Double.parseDouble(JMD))), usa = new Currency("USD", Double.parseDouble("1"));
                 saveExchangeRate(ja);
+                saveExchangeRate(usa);
                 getExchangeRates();
                 return "true";
 
@@ -422,17 +447,6 @@ public class Currency_Converter extends AppCompatActivity {
             }
 
 
-
-
-
-
-
-
-
-
-
-
-
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -460,7 +474,7 @@ public class Currency_Converter extends AppCompatActivity {
                 Log.d("Paul", "The file name is " + "JMD");
                 Log.d("Paul", "Exchange rate is " + dataFromAsyncTask);
                 if (dataFromAsyncTask.equals("true")) {
-                    exchangeRate = Double.parseDouble(file.getString("JMD", "0"));
+                    updateExchangeRate();
                     Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
 
                     Date current = new Date();
@@ -474,10 +488,50 @@ public class Currency_Converter extends AppCompatActivity {
                     for (Currency currency : currencies)
                         saveExchangeRate(currency);
                     currencies = null;
+                    populateDropDownList();
                 }
             } else
                 setDialog("No Network Connection");
 
+    }
+
+    public void updateExchangeRate(){
+        exchangeRate = calculateExchangeRate(currency1, currency2);
+    }
+
+    public void populateDropDownList(){
+        String[] currencyList = getCurrencies(); //array of currency, put in listview
+        ArrayAdapter listAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
+        list.setAdapter(listAdapter);
+        list2.setAdapter(listAdapter);
+
+        for (String c : currencyList){
+            Log.d("Paul",c);
+        }
+    }
+
+    public String[] getCurrencies(){
+        List<String> currencyList = new LinkedList<String>(Arrays.asList(file.getAll().keySet().toArray(new String[0])));
+
+        /*for (String c : currencyList){
+            if(c.length() > 3)
+                currencyList.remove(c);
+        }*/
+
+        for (Iterator<String> iterator = currencyList.iterator(); iterator.hasNext(); ) {
+            String value = iterator.next();
+            if (value.length() > 3) {
+                iterator.remove();
+            }
+        }
+
+        String[] currency = currencyList.toArray(new String[0]);
+
+        return currency;
+    }
+
+    public Double calculateExchangeRate(String currency1, String currency2){
+        return ((getExchangeRate(currency2).getRate())/(getExchangeRate(currency1).getRate()));
     }
 
     public void setDialog(String message) {
