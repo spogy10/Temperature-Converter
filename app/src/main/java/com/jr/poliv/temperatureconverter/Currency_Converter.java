@@ -11,6 +11,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -18,6 +19,8 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -37,6 +40,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -52,13 +57,12 @@ public class Currency_Converter extends AppCompatActivity {
 
     public String date_last_updated;
     double exchangeRate = 0;
-    public String currency1, currency2; // TODO: make currency display text into drop-down list populated by the currencies in the file
-    // TODO: use a method tht changes the exchange rate on drop-down change also save the new currencies into these variables
-    // TODO: store current selected currencies in the file and load them into the variables upon start up
+    public String currency1, currency2;
+    // TODO: add a floating button that swaps currencies
     SimpleDateFormat dateFormat;
     EditText editText, editText2;
     Spinner list,list2;
-    ArrayAdapter<String> listAdapter;
+    ArrayAdapter<String> listAdapter, list2Adapter;
     DialogFragment dialog = new OkDialog();
     SharedPreferences file;
     SharedPreferences.Editor editor;
@@ -84,6 +88,14 @@ public class Currency_Converter extends AppCompatActivity {
 
         currency1 = "JMD"; currency2 = "USD";
 
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                swapCurrencies();
+            }
+        });
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -97,6 +109,7 @@ public class Currency_Converter extends AppCompatActivity {
         list = (Spinner) findViewById(R.id.list);
         list2 = (Spinner) findViewById(R.id.list2);
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
+        editor = file.edit();
 
         if (!file.contains("USD"))
             Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
@@ -104,6 +117,18 @@ public class Currency_Converter extends AppCompatActivity {
             updateExchangeRate();
             populateDropDownList();
             checkDate();
+            if(file.contains("currency1") && (file.contains("currency2"))){
+                if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
+                    list.setSelection(listAdapter.getPosition(file.getString("currency1", "JMD")));
+                }else{
+                    list.setSelection(listAdapter.getPosition("JMD"));
+                }
+                if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
+                    list2.setSelection(list2Adapter.getPosition(file.getString("currency2", "USD")));
+                }else{
+                    list2.setSelection(list2Adapter.getPosition("USD"));
+                }
+            }
         }
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -150,11 +175,34 @@ public class Currency_Converter extends AppCompatActivity {
 
         });
 
+        list.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setCurrency1(parent.getItemAtPosition(position).toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        list2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                setCurrency2(parent.getItemAtPosition(position).toString());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-
     public void afterTextChanged (Editable s){
         Toast.makeText(Currency_Converter.this, "did it work", Toast.LENGTH_SHORT).show();
 
@@ -184,6 +232,30 @@ public class Currency_Converter extends AppCompatActivity {
     public void setCurrency2(String currency){
         currency2 = currency;
         updateExchangeRate();
+    }
+
+    public void swapCurrencies(){
+
+        if (!file.contains("JMD"))
+            Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+        else {
+            int tempInt = list.getSelectedItemPosition();
+            list.setSelection(list2.getSelectedItemPosition());
+            list2.setSelection(tempInt);
+        }
+
+    }
+
+    public boolean saveCurrency1(){
+        return editor.putString("currency1", currency1).commit();
+    }
+
+    public boolean saveCurrency2(){
+        return editor.putString("currency2", currency2).commit();
+    }
+
+    public boolean saveCurrencies(){
+        return (saveCurrency1() && saveCurrency2());
     }
 
     public String getInfoFromWebsite() throws IOException {
@@ -342,6 +414,8 @@ public class Currency_Converter extends AppCompatActivity {
     public void onStop() {
         super.onStop();
 
+        saveCurrencies();
+
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
@@ -415,7 +489,7 @@ public class Currency_Converter extends AppCompatActivity {
                 Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
             else {
                 checkDate();
-                setDialog("US$1 = JA$ " + file.getString("JMD", "0"));
+                setDialog(currency1+"$1 = "+currency2+"$ " + exchangeRate);
             }
 
 
@@ -501,9 +575,10 @@ public class Currency_Converter extends AppCompatActivity {
 
     public void populateDropDownList(){
         String[] currencyList = getCurrencies(); //array of currency, put in listview
-        ArrayAdapter listAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
+        listAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
+        list2Adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
         list.setAdapter(listAdapter);
-        list2.setAdapter(listAdapter);
+        list2.setAdapter(list2Adapter);
 
         for (String c : currencyList){
             Log.d("Paul",c);
@@ -513,10 +588,6 @@ public class Currency_Converter extends AppCompatActivity {
     public String[] getCurrencies(){
         List<String> currencyList = new LinkedList<String>(Arrays.asList(file.getAll().keySet().toArray(new String[0])));
 
-        /*for (String c : currencyList){
-            if(c.length() > 3)
-                currencyList.remove(c);
-        }*/
 
         for (Iterator<String> iterator = currencyList.iterator(); iterator.hasNext(); ) {
             String value = iterator.next();
@@ -524,6 +595,13 @@ public class Currency_Converter extends AppCompatActivity {
                 iterator.remove();
             }
         }
+
+        Collections.sort(currencyList, new Comparator<String>() {
+            @Override
+            public int compare(String s1, String s2) {
+                return s1.compareToIgnoreCase(s2);
+            }
+        });
 
         String[] currency = currencyList.toArray(new String[0]);
 
