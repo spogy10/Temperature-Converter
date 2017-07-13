@@ -58,7 +58,6 @@ public class Currency_Converter extends AppCompatActivity {
     public String date_last_updated;
     double exchangeRate = 0;
     public String currency1, currency2;
-    // TODO: add a floating button that swaps currencies
     SimpleDateFormat dateFormat;
     EditText editText, editText2;
     Spinner list,list2;
@@ -117,18 +116,7 @@ public class Currency_Converter extends AppCompatActivity {
             updateExchangeRate();
             populateDropDownList();
             checkDate();
-            if(file.contains("currency1") && (file.contains("currency2"))){
-                if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
-                    list.setSelection(listAdapter.getPosition(file.getString("currency1", "JMD")));
-                }else{
-                    list.setSelection(listAdapter.getPosition("JMD"));
-                }
-                if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
-                    list2.setSelection(list2Adapter.getPosition(file.getString("currency2", "USD")));
-                }else{
-                    list2.setSelection(list2Adapter.getPosition("USD"));
-                }
-            }
+            restoreCurrencySelectionFromFile();
         }
 
         editText.addTextChangedListener(new TextWatcher() {
@@ -205,6 +193,38 @@ public class Currency_Converter extends AppCompatActivity {
     }
     public void afterTextChanged (Editable s){
         Toast.makeText(Currency_Converter.this, "did it work", Toast.LENGTH_SHORT).show();
+
+    }
+
+    public void restoreCurrencySelectionFromLocalVariables(){
+        if(file.contains("currency1") && (file.contains("currency2"))){
+            if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
+                list.setSelection(listAdapter.getPosition(currency1));
+            }else{
+                list.setSelection(listAdapter.getPosition("JMD"));
+            }
+            if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
+                list2.setSelection(list2Adapter.getPosition(currency2));
+            }else{
+                list2.setSelection(list2Adapter.getPosition("USD"));
+            }
+        }
+    }
+
+    public void restoreCurrencySelectionFromFile(){
+
+        if(file.contains("currency1") && (file.contains("currency2"))){
+            if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
+                list.setSelection(listAdapter.getPosition(file.getString("currency1", "JMD")));
+            }else{
+                list.setSelection(listAdapter.getPosition("JMD"));
+            }
+            if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
+                list2.setSelection(list2Adapter.getPosition(file.getString("currency2", "USD")));
+            }else{
+                list2.setSelection(list2Adapter.getPosition("USD"));
+            }
+        }
 
     }
 
@@ -317,8 +337,8 @@ public class Currency_Converter extends AppCompatActivity {
             Currency[] currencies = new Currency[names.length()];
 
             for(int i = 0; i < names.length(); i++){
-                currencies[i] = new Currency(names.getString(i).toString(), Double.parseDouble(j2.getString(names.getString(i).toString())));
-                //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i).toString() + " = " + j2.getString(names.getString(i).toString()));
+                currencies[i] = new Currency(names.getString(i), Double.parseDouble(j2.getString(names.getString(i))));
+                //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i) + " = " + j2.getString(names.getString(i)));
             }
 
 
@@ -563,6 +583,7 @@ public class Currency_Converter extends AppCompatActivity {
                         saveExchangeRate(currency);
                     currencies = null;
                     populateDropDownList();
+                    restoreCurrencySelectionFromLocalVariables();
                 }
             } else
                 setDialog("No Network Connection");
@@ -574,6 +595,7 @@ public class Currency_Converter extends AppCompatActivity {
     }
 
     public void populateDropDownList(){
+        String currency1 = this.currency1, currency2 = this.currency2;
         String[] currencyList = getCurrencies(); //array of currency, put in listview
         listAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
         list2Adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
@@ -583,6 +605,9 @@ public class Currency_Converter extends AppCompatActivity {
         for (String c : currencyList){
             Log.d("Paul",c);
         }
+
+        setCurrency1(currency1); setCurrency2(currency2);
+
     }
 
     public String[] getCurrencies(){
