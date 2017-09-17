@@ -372,9 +372,9 @@ public class Currency_Converter extends AppCompatActivity {
         String intro = "<b>10-DAY MOVING AVERAGE RATE</b></td>\n" +
                 "                          </tr>\n" +
                 "                          <tr>\n" +
-                "                            <td><b>CURRENCY</b></td>\n" +
-                "                            <td align=\"center\" width=\"256px\"><b>PURCHASE</b></td>\n" +
-                "                            <td align=\"center\" width=\"198px\"><b>SALES</b></td>\n" +
+                "                            <td  width=\"11%\"><b>CURRENCY</b></td>\n" +
+                "                            <td align=\"center\" width=\"44.5%\"><b>PURCHASE</b></td>\n" +
+                "                            <td align=\"center\" width=\"44.5%\"><b>SALES</b></td>\n" +
                 "                          </tr>\n" +
                 "                          \n" +
                 "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">";
@@ -382,12 +382,12 @@ public class Currency_Converter extends AppCompatActivity {
         String intro2 = "<b>10-DAY MOVING AVERAGE RATE</b></td>\n" +
                 "                          </tr>\n" +
                 "                          <tr>\n" +
-                "                            <td><b>CURRENCY</b></td>\n" +
-                "                            <td align=\"center\" width=\"256px\"><b>PURCHASE</b></td>\n" +
-                "                            <td align=\"center\" width=\"198px\"><b>SALES</b></td>\n" +
+                "                            <td  width=\"11%\"><b>CURRENCY</b></td>\n" +
+                "                            <td align=\"center\" width=\"44.5%\"><b>PURCHASE</b></td>\n" +
+                "                            <td align=\"center\" width=\"44.5%\"><b>SALES</b></td>\n" +
                 "                          </tr>\n" +
                 "                          \n" +
-                "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">127.6632</td><td align=\"right\">";
+                "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">129.1550</td><td align=\"right\">";
 
     string = string.substring(string.indexOf(intro));
     return string.substring(intro2.length(), intro2.length() + 8);
