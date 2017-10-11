@@ -50,7 +50,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class Currency_Converter extends AppCompatActivity {
+public class Currency_Converter extends AppCompatActivity { //TODO: add loading bar
     public String dataFromAsyncTask = "0";
     public Currency[] currencies = null;
     public String folder_name;
@@ -477,6 +477,7 @@ public class Currency_Converter extends AppCompatActivity {
 
         protected void onPostExecute(String result) {
             Log.d("Paul", "Result is " + result);
+            update(result);
         }
 
 
@@ -547,15 +548,39 @@ public class Currency_Converter extends AppCompatActivity {
         return true;
     }
 
+    private void update(String result){
+        dataFromAsyncTask = result;
+        Log.d("Paul", "The file name is " + "JMD");
+        Log.d("Paul", "Exchange rate is " + dataFromAsyncTask);
+        if (dataFromAsyncTask.equals("true")) {
+            updateExchangeRate();
+            Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
+
+            Date current = new Date();
+            editor = file.edit();
+
+            if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
+                Log.d("Paul", "date written to file");
+        }
+
+        if (currencies != null){
+            for (Currency currency : currencies)
+                saveExchangeRate(currency);
+            currencies = null;
+            populateDropDownList();
+            restoreCurrencySelectionFromLocalVariables();
+        }
+    }
+
     public void update(){
 
             ConnectivityManager connMgr = (ConnectivityManager)
                     getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.isConnected()) {
-                try {
-                    dataFromAsyncTask = new ReadFromWebsite().execute().get(10, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
+                //try {
+                    new ReadFromWebsite().execute();
+                /*} catch (InterruptedException e) {
                     setDialog("Update Failed");
                     Log.d("Paul", String.valueOf(e));
                 } catch (ExecutionException e) {
@@ -564,27 +589,8 @@ public class Currency_Converter extends AppCompatActivity {
                 } catch (TimeoutException e) {
                     setDialog("System Timed Out");
                     Log.d("Paul", String.valueOf(e));
-                }
-                Log.d("Paul", "The file name is " + "JMD");
-                Log.d("Paul", "Exchange rate is " + dataFromAsyncTask);
-                if (dataFromAsyncTask.equals("true")) {
-                    updateExchangeRate();
-                    Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
+                }*/
 
-                    Date current = new Date();
-                    editor = file.edit();
-
-                    if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
-                        Log.d("Paul", "date written to file");
-                }
-
-                if (currencies != null){
-                    for (Currency currency : currencies)
-                        saveExchangeRate(currency);
-                    currencies = null;
-                    populateDropDownList();
-                    restoreCurrencySelectionFromLocalVariables();
-                }
             } else
                 setDialog("No Network Connection");
 
