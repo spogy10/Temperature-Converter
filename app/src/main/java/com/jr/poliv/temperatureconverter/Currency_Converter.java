@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
@@ -50,7 +51,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class Currency_Converter extends AppCompatActivity { //TODO: add loading bar
+public class Currency_Converter extends AppCompatActivity {
     public String dataFromAsyncTask = "0";
     public Currency[] currencies = null;
     public String folder_name;
@@ -61,6 +62,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
     SimpleDateFormat dateFormat;
     EditText editText, editText2;
     Spinner list,list2;
+    ProgressBar progressBar;
     ArrayAdapter<String> listAdapter, list2Adapter;
     DialogFragment dialog = new OkDialog();
     SharedPreferences file;
@@ -96,6 +98,8 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
             }
         });
 
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
@@ -111,7 +115,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
         editor = file.edit();
 
         if (!file.contains("USD"))
-            Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
         else {
             updateExchangeRate();
             populateDropDownList();
@@ -132,7 +136,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
             @Override
             public void afterTextChanged(Editable arg0) {
                 if (exchangeRate == 0)
-                    Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
                 else
                 if(editText.isFocused())
                     if (!( (editText.getText().toString().equals("")) || (editText.getText().toString().equals(".")) ))
@@ -154,7 +158,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
             @Override
             public void afterTextChanged(Editable arg0) {
                 if (exchangeRate == 0)
-                    Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
                 else
                 if(editText2.isFocused())
                     if (!( (editText2.getText().toString().equals("")) || (editText2.getText().toString().equals(".")) ))
@@ -257,7 +261,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
     public void swapCurrencies(){
 
         if (!file.contains("JMD"))
-            Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
         else {
             int tempInt = list.getSelectedItemPosition();
             list.setSelection(list2.getSelectedItemPosition());
@@ -306,7 +310,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
     public void getExchangeRates() throws IOException{
         InputStream is = null;
         try{
-            URL url = new URL("http://api.fixer.io/latest?base=USD");
+            URL url = new URL("http://data.fixer.io/api/latest?access_key=90fb7ac8a78ad68ec1f6636c1317e439"); //http://api.fixer.io/latest?base=USD
             HttpURLConnection in = (HttpURLConnection) url.openConnection();
             in.setReadTimeout(10000 /* milliseconds */);
             in.setConnectTimeout(15000 /* milliseconds */);
@@ -332,13 +336,17 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
             JSONObject jObject = new JSONObject(result);
             JSONObject j2 = new JSONObject(jObject.getString("rates"));
 
+            j2.remove("JMD");
+
             JSONArray names = j2.names();
+
+            double eurToUsd = Double.parseDouble(j2.getString("USD"));
 
             Currency[] currencies = new Currency[names.length()];
 
             for(int i = 0; i < names.length(); i++){
-                currencies[i] = new Currency(names.getString(i), Double.parseDouble(j2.getString(names.getString(i))));
-                //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i) + " = " + j2.getString(names.getString(i)));
+                currencies[i] = new Currency(names.getString(i), ( eurToUsd / Double.parseDouble(j2.getString(names.getString(i)))));
+                Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i) + " = " + j2.getString(names.getString(i)) + "; reverse usd value = "+ currencies[i].getRate());
             }
 
 
@@ -453,10 +461,11 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
     }
 
 
-    public class ReadFromWebsite extends AsyncTask<Object, Void, String> {
+    public class ReadFromWebsite extends AsyncTask<Void, Void, String> {
+
 
         @Override
-        protected String doInBackground(Object[] params) {
+        protected String doInBackground(Void... voids) {
             try{
                 String JMD = getInfoFromWebsite();
                 Currency ja = new Currency("JMD", (1/Double.parseDouble(JMD))), usa = new Currency("USD", Double.parseDouble("1"));
@@ -471,12 +480,11 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
                 Log.d("Paul", "nah it didn't work");
                 return "false";
             }
-
         }
-
 
         protected void onPostExecute(String result) {
             Log.d("Paul", "Result is " + result);
+            hideProgressBar();
             update(result);
         }
 
@@ -507,7 +515,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
         if (id == com.jr.poliv.temperatureconverter.R.id.display_exchange_rate) {
 
             if (!file.contains("JMD"))
-                Toast.makeText(Currency_Converter.this, "Update Exchange Rate", Toast.LENGTH_LONG).show();
+                Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
             else {
                 checkDate();
                 setDialog(currency1+"$1 = "+currency2+"$ " + exchangeRate);
@@ -551,7 +559,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
     private void update(String result){
         dataFromAsyncTask = result;
         Log.d("Paul", "The file name is " + "JMD");
-        Log.d("Paul", "Exchange rate is " + dataFromAsyncTask);
+        Log.d("Paul", "Exchange rate successful " + dataFromAsyncTask);
         if (dataFromAsyncTask.equals("true")) {
             updateExchangeRate();
             Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
@@ -561,6 +569,9 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
 
             if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
                 Log.d("Paul", "date written to file");
+            Toast.makeText(this, R.string.success, Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, R.string.error_getting_rates, Toast.LENGTH_SHORT).show();
         }
 
         if (currencies != null){
@@ -579,6 +590,7 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if (networkInfo != null && networkInfo.isConnected()) {
                 //try {
+                showProgressBar();
                     new ReadFromWebsite().execute();
                 /*} catch (InterruptedException e) {
                     setDialog("Update Failed");
@@ -641,6 +653,14 @@ public class Currency_Converter extends AppCompatActivity { //TODO: add loading 
 
     public Double calculateExchangeRate(String currency1, String currency2){
         return ((getExchangeRate(currency2).getRate())/(getExchangeRate(currency1).getRate()));
+    }
+
+    private void showProgressBar(){
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar(){
+        progressBar.setVisibility(View.GONE);
     }
 
     public void setDialog(String message) {
