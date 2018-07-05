@@ -1,4 +1,4 @@
-package com.jr.poliv.temperatureconverter;
+package com.jr.poliv.temperatureconverteralpha;
 
 /**
  * Created by poliv on 1/1/2017.

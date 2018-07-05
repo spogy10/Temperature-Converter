@@ -1,4 +1,4 @@
-package com.jr.poliv.temperatureconverter;
+package com.jr.poliv.temperatureconverteralpha;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;

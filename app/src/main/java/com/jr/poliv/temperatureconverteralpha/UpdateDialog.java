@@ -1,4 +1,4 @@
-package com.jr.poliv.temperatureconverter;
+package com.jr.poliv.temperatureconverteralpha;
 
 import android.app.Dialog;
 import android.app.DialogFragment;

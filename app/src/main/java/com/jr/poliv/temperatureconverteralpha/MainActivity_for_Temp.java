@@ -1,4 +1,4 @@
-package com.jr.poliv.temperatureconverter;
+package com.jr.poliv.temperatureconverteralpha;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -224,7 +224,7 @@ public class MainActivity_for_Temp extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverter/http/host/path")
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -243,7 +243,7 @@ public class MainActivity_for_Temp extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverter/http/host/path")
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();

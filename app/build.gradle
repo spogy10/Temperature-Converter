@@ -4,7 +4,7 @@ android {
     compileSdkVersion 23
     buildToolsVersion '27.0.3'
     defaultConfig {
-        applicationId "com.jr.poliv.temperatureconverter"
+        applicationId "com.jr.poliv.temperatureconverteralpha"
         minSdkVersion 12
         targetSdkVersion 23
         versionName '5'

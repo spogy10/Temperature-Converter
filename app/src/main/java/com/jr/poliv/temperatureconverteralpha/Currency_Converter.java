@@ -1,4 +1,4 @@
-package com.jr.poliv.temperatureconverter;
+package com.jr.poliv.temperatureconverteralpha;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -104,11 +104,11 @@ public class Currency_Converter extends AppCompatActivity {
 
 
         dateFormat = new SimpleDateFormat("dd-MM-yyyy");
-        folder_name = getString(com.jr.poliv.temperatureconverter.R.string.folder_name);
+        folder_name = getString(com.jr.poliv.temperatureconverteralpha.R.string.folder_name);
 
         date_last_updated = getString(R.string.date_last_updated);
-        editText = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText);
-        editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverter.R.id.editText2);
+        editText = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText);
+        editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText2);
         list = (Spinner) findViewById(R.id.list);
         list2 = (Spinner) findViewById(R.id.list2);
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
@@ -433,7 +433,7 @@ public class Currency_Converter extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverter/http/host/path")
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
     }
@@ -454,7 +454,7 @@ public class Currency_Converter extends AppCompatActivity {
                 // Otherwise, set the URL to null.
                 Uri.parse("http://host/path"),
                 // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverter/http/host/path")
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
         );
         AppIndex.AppIndexApi.end(client, viewAction);
         client.disconnect();
@@ -495,7 +495,7 @@ public class Currency_Converter extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(com.jr.poliv.temperatureconverter.R.menu.menu_main, menu);
+        getMenuInflater().inflate(com.jr.poliv.temperatureconverteralpha.R.menu.menu_main, menu);
         return true;
     }
 
@@ -507,12 +507,12 @@ public class Currency_Converter extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == com.jr.poliv.temperatureconverter.R.id.update_exchange_rate) {
+        if (id == com.jr.poliv.temperatureconverteralpha.R.id.update_exchange_rate) {
             update();
             return true;
         }
 
-        if (id == com.jr.poliv.temperatureconverter.R.id.display_exchange_rate) {
+        if (id == com.jr.poliv.temperatureconverteralpha.R.id.display_exchange_rate) {
 
             if (!file.contains("JMD"))
                 Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
