@@ -1,7 +1,7 @@
 package com.jr.poliv.temperatureconverteralpha;
 
 import android.content.Intent;
-import androidx.appcompat.app.ActionBar;
+
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -27,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         Temp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MainActivity_for_Temp.class);
+                Intent intent = new Intent(MainActivity.this, MainActivityForTemp.class);
                 startActivity(intent);
             }
         });
@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
         Currency.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, Currency_Converter.class);
+                Intent intent = new Intent(MainActivity.this, CurrencyConverter.class);
                 startActivity(intent);
             }
         });

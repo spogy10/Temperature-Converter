@@ -3,13 +3,12 @@ package com.jr.poliv.temperatureconverteralpha;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
-public class Fahrenheit_to_Kelvin extends Celsius_to_Fahrenheit {
+public class Fahrenheit_to_Kelvin extends CelsiusToFahrenheit {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

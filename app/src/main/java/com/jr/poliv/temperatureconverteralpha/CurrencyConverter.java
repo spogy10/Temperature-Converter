@@ -45,7 +45,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class Currency_Converter extends AppCompatActivity {
+public class CurrencyConverter extends AppCompatActivity {
 
     CurrencyManager currencyManager;
 
@@ -118,7 +118,7 @@ public class Currency_Converter extends AppCompatActivity {
 
     private void startupTasks() {
         if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
-            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+            Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -188,7 +188,7 @@ public class Currency_Converter extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable arg0) {
                 if (currencyManager.isExchangeRateSet()){
-                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+                    Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
                     return;
                 }
 
@@ -216,7 +216,7 @@ public class Currency_Converter extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable arg0) {
                 if (currencyManager.isExchangeRateSet()){
-                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+                    Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
                     return;
                 }
                 if(!etCurrency1.isFocused()) return;
@@ -299,17 +299,17 @@ public class Currency_Converter extends AppCompatActivity {
     }
 
     private void setEtCurrency1(double value){
-        etCurrency1.setText(String.format("%.2f", value);
+        etCurrency1.setText(String.format("%.2f", value));
     }
 
     private void setEtCurrency2(double value){
-        etCurrency2.setText(String.format("%.2f", value);
+        etCurrency2.setText(String.format("%.2f", value));
     }
 
     public void swapCurrencies(){
 
         if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
-            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+            Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -544,7 +544,7 @@ public class Currency_Converter extends AppCompatActivity {
         if (id == com.jr.poliv.temperatureconverteralpha.R.id.display_exchange_rate) {
 
             if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
-                Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+                Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
             }
             checkDate();
             String exchangeRateDisplay = currencyManager.displayExchangeRate();

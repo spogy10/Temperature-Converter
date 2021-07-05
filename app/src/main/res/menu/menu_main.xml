@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".Currency_Converter">
+    tools:context=".CurrencyConverter">
     <item
         android:id="@+id/update_exchange_rate"
         android:orderInCategory="100"

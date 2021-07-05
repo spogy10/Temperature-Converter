@@ -3,18 +3,17 @@ package com.jr.poliv.temperatureconverteralpha;
 import android.content.Context;
 import android.os.Bundle;
 
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
-public class Kelvin_to_Celsius extends Celsius_to_Fahrenheit {
+public class CelsiusToKelvin extends CelsiusToFahrenheit {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_kelvin_to__celsius);
+        setContentView(R.layout.activity_celsius_to__kelvin);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -28,7 +27,7 @@ public class Kelvin_to_Celsius extends Celsius_to_Fahrenheit {
                 InputMethodManager inputManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 inputManager.hideSoftInputFromWindow((null == getCurrentFocus()) ? null : getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
 
-                display(K_to_C(acceptvar()), '°', 'C');
+                display(C_to_K(acceptvar()), 'K', ' ');
             }
         });
 

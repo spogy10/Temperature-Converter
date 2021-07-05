@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-public class Celsius_to_Fahrenheit extends AppCompatActivity {
+public class CelsiusToFahrenheit extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
