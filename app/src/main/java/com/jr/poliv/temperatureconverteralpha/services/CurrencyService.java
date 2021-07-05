@@ -1,5 +1,7 @@
 package com.jr.poliv.temperatureconverteralpha.services;
 
+import com.jr.poliv.temperatureconverteralpha.Currency;
+
 public interface CurrencyService {
 
     double calculateExchangeRate(Currency from, Currency to);

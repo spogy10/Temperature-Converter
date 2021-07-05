@@ -53,8 +53,6 @@ public class CurrencyConverter extends AppCompatActivity {
 
     public String folder_name;
 
-    public String date_last_updated;
-    SimpleDateFormat dateFormat;
     EditText etCurrency1, etCurrency2;
     Spinner spCurrencyList1, spCurrencyList2;
     ProgressBar progressBar;
@@ -90,11 +88,7 @@ public class CurrencyConverter extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-
-        dateFormat = new SimpleDateFormat("dd-MM-yyyy");
         folder_name = getString(com.jr.poliv.temperatureconverteralpha.R.string.folder_name);
-
-        date_last_updated = getString(R.string.date_last_updated);
 
         SharedPreferences file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
 
@@ -579,7 +573,6 @@ public class CurrencyConverter extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == com.jr.poliv.temperatureconverteralpha.R.id.update_exchange_rate) {
             update();
             return true;
