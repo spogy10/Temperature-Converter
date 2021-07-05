@@ -60,8 +60,6 @@ public class CurrencyConverter extends AppCompatActivity {
     ProgressBar progressBar;
     ArrayAdapter<String> currencyAdapter1, currencyAdapter2;
     DialogFragment dialog = new OkDialog();
-    SharedPreferences file;
-    SharedPreferences.Editor editor;
 
 
     /**
@@ -98,8 +96,9 @@ public class CurrencyConverter extends AppCompatActivity {
 
         date_last_updated = getString(R.string.date_last_updated);
 
-        file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
-        editor = file.edit();
+        SharedPreferences file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
+
+        currencyManager = new CurrencyManager(file);
 
         startupTasks();
 
@@ -129,7 +128,6 @@ public class CurrencyConverter extends AppCompatActivity {
     }
 
     public void populateDropDownList(){
-        String currency1 = this.selectedCurrency1, currency2 = this.selectedCurrency2;
         String[] currencyList = currencyManager.getCurrencyList(); //array of currency, put in listview
         currencyAdapter1 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
         currencyAdapter2 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
@@ -139,12 +137,9 @@ public class CurrencyConverter extends AppCompatActivity {
         for (String c : currencyList){
             Log.d("Paul",c);
         }
-
-        currencyManager.setSelectedCurrency1(currency1);
-        currencyManager.setSelectedCurrency2(currency2);
     }
 
-    private void setCurrency2ListOnItemSelectedListener() {
+    private void setCurrency2ListOnItemSelectedListener(){
         spCurrencyList2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -159,7 +154,7 @@ public class CurrencyConverter extends AppCompatActivity {
         });
     }
 
-    private void setCurrency1ListOnItemSelectedListener() {
+    private void setCurrency1ListOnItemSelectedListener(){
         spCurrencyList1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -240,21 +235,6 @@ public class CurrencyConverter extends AppCompatActivity {
         });
     }
 
-    public void restoreCurrencySelectionFromLocalVariables(){
-        if(file.contains("currency1") && (file.contains("currency2"))){
-            if(currencyAdapter1.getPosition(file.getString("currency1", "JMD")) != -1) {
-                spCurrencyList1.setSelection(currencyAdapter1.getPosition(selectedCurrency1));
-            }else{
-                spCurrencyList1.setSelection(currencyAdapter1.getPosition("JMD"));
-            }
-            if(currencyAdapter2.getPosition(file.getString("currency2", "USD")) != -1) {
-                spCurrencyList2.setSelection(currencyAdapter2.getPosition(selectedCurrency2));
-            }else{
-                spCurrencyList2.setSelection(currencyAdapter2.getPosition("USD"));
-            }
-        }
-    }
-
     private void restoreCurrencySelectionFromFile(){
         restoreCurrencySelection1();
         restoreCurrencySelection2();
@@ -286,13 +266,13 @@ public class CurrencyConverter extends AppCompatActivity {
         spCurrencyList1.setSelection(currencyPosition);
     }
 
-    public void calculateCurrency2() {
+    private void calculateCurrency2() {
         double currency1 = Double.parseDouble(etCurrency1.getText().toString());
         double currency2 = currencyManager.convertCurrency1ToCurrency2(currency1);
         setEtCurrency2(currency2);
     }
 
-    public void calculateCurrency1() {
+    private void calculateCurrency1() {
         double currency2 = Double.parseDouble(etCurrency2.getText().toString());
         double currency1 = currencyManager.convertCurrency2ToCurrency1(currency2);
         setEtCurrency1(currency1);
@@ -306,7 +286,7 @@ public class CurrencyConverter extends AppCompatActivity {
         etCurrency2.setText(String.format("%.2f", value));
     }
 
-    public void swapCurrencies(){
+    private void swapCurrencies(){
 
         if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
             Toast.makeText(CurrencyConverter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
@@ -317,6 +297,112 @@ public class CurrencyConverter extends AppCompatActivity {
         spCurrencyList1.setSelection(spCurrencyList2.getSelectedItemPosition());
         spCurrencyList2.setSelection(tempInt);
     }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if(currencyManager != null){
+            currencyManager.saveCurrencySelection();
+        }
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Main Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+
+    private void showProgressBar(){
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideProgressBar(){
+        progressBar.setVisibility(View.GONE);
+    }
+
+    private void setDialog(String message) {
+        Bundle args = new Bundle();
+        args.putString("message", message);
+        dialog.setArguments(args);
+        dialog.show(getFragmentManager(), "");
+    }
+
+    public static class OkDialog extends DialogFragment {
+        public OkDialog() {
+
+        }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            Bundle args = getArguments();
+            String message = args.getString("message", "");
+
+            return new AlertDialog.Builder(getActivity())
+                    .setTitle("")
+                    .setMessage(message)
+                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .create();
+        }
+    }
+
+
+
+
+
+
+
+
+    public void restoreCurrencySelectionFromLocalVariables(){
+        if(file.contains("currency1") && (file.contains("currency2"))){
+            if(currencyAdapter1.getPosition(file.getString("currency1", "JMD")) != -1) {
+                spCurrencyList1.setSelection(currencyAdapter1.getPosition(selectedCurrency1));
+            }else{
+                spCurrencyList1.setSelection(currencyAdapter1.getPosition("JMD"));
+            }
+            if(currencyAdapter2.getPosition(file.getString("currency2", "USD")) != -1) {
+                spCurrencyList2.setSelection(currencyAdapter2.getPosition(selectedCurrency2));
+            }else{
+                spCurrencyList2.setSelection(currencyAdapter2.getPosition("USD"));
+            }
+        }
+    }
+
 
     public String getInfoFromWebsite() throws IOException {
         InputStream is = null;
@@ -444,49 +530,7 @@ public class CurrencyConverter extends AppCompatActivity {
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
 
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        client.connect();
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
-        );
-        AppIndex.AppIndexApi.start(client, viewAction);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-
-        if(currencyManager != null){
-            currencyManager.saveCurrencySelection();
-        }
-
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
-        Action viewAction = Action.newAction(
-                Action.TYPE_VIEW, // TODO: choose an action type.
-                "Main Page", // TODO: Define a title for the content shown.
-                // TODO: If you have web page content that matches this app activity's content,
-                // make sure this auto-generated web page URL is correct.
-                // Otherwise, set the URL to null.
-                Uri.parse("http://host/path"),
-                // TODO: Make sure this auto-generated app deep link URI is correct.
-                Uri.parse("android-app://com.jr.poliv.temperatureconverteralpha/http/host/path")
-        );
-        AppIndex.AppIndexApi.end(client, viewAction);
-        client.disconnect();
-    }
 
 
     public class ReadFromWebsite extends AsyncTask<Void, Void, String> {
@@ -635,41 +679,5 @@ public class CurrencyConverter extends AppCompatActivity {
 
     }
 
-    private void showProgressBar(){
-        progressBar.setVisibility(View.VISIBLE);
-    }
 
-    private void hideProgressBar(){
-        progressBar.setVisibility(View.GONE);
-    }
-
-    private void setDialog(String message) {
-        Bundle args = new Bundle();
-        args.putString("message", message);
-        dialog.setArguments(args);
-        dialog.show(getFragmentManager(), "");
-    }
-
-    public static class OkDialog extends DialogFragment {
-        public OkDialog() {
-
-        }
-
-        @Override
-        public Dialog onCreateDialog(Bundle savedInstanceState) {
-            Bundle args = getArguments();
-            String message = args.getString("message", "");
-
-            return new AlertDialog.Builder(getActivity())
-                    .setTitle("")
-                    .setMessage(message)
-                    .setNeutralButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    })
-                    .create();
-        }
-    }
 }

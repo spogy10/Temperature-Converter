@@ -49,6 +49,11 @@ public class MyCurrencyService implements CurrencyService {
     }
 
     @Override
+    public boolean updateExchangeRate() {
+        return false;
+    }
+
+    @Override
     public String getFirstCurrencySelectionFromFile() {
         return file.getString("currency1", "JMD");
     }
