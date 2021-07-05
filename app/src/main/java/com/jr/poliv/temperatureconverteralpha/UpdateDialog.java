@@ -4,9 +4,7 @@ import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v7.app.AlertDialog;
-import android.view.Menu;
-import android.view.MenuItem;
+import androidx.appcompat.app.AlertDialog;
 
 /**
  * Created by poliv on 5/8/2016.

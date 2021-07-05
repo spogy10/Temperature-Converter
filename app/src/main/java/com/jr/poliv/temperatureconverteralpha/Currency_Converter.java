@@ -11,9 +11,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -29,6 +29,8 @@ import android.widget.Toast;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.jr.poliv.temperatureconverteralpha.services.CurrencyManager;
+
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -37,40 +39,33 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class Currency_Converter extends AppCompatActivity {
+
+    CurrencyManager currencyManager;
+
     public String dataFromAsyncTask = "0";
-    public Currency[] currencies = null;
+
     public String folder_name;
 
     public String date_last_updated;
-    double exchangeRate = 0;
-    public String currency1, currency2;
     SimpleDateFormat dateFormat;
-    EditText editText, editText2;
-    Spinner list,list2;
+    EditText etCurrency1, etCurrency2;
+    Spinner spCurrencyList1, spCurrencyList2;
     ProgressBar progressBar;
-    ArrayAdapter<String> listAdapter, list2Adapter;
+    ArrayAdapter<String> currencyAdapter1, currencyAdapter2;
     DialogFragment dialog = new OkDialog();
     SharedPreferences file;
     SharedPreferences.Editor editor;
 
 
     /**
-     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * ATTENTION: This was auto-generated to implement the App Indexing API.-
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client2;
@@ -87,18 +82,13 @@ public class Currency_Converter extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        currency1 = "JMD"; currency2 = "USD";
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        assert fab != null;
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                swapCurrencies();
-            }
-        });
+        setFABAction();
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
+        etCurrency1 = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText);
+        etCurrency2 = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText2);
+        spCurrencyList1 = (Spinner) findViewById(R.id.list);
+        spCurrencyList2 = (Spinner) findViewById(R.id.list2);
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -107,179 +97,225 @@ public class Currency_Converter extends AppCompatActivity {
         folder_name = getString(com.jr.poliv.temperatureconverteralpha.R.string.folder_name);
 
         date_last_updated = getString(R.string.date_last_updated);
-        editText = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText);
-        editText2 = (EditText) findViewById(com.jr.poliv.temperatureconverteralpha.R.id.editText2);
-        list = (Spinner) findViewById(R.id.list);
-        list2 = (Spinner) findViewById(R.id.list2);
+
         file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
         editor = file.edit();
 
-        if (!file.contains("USD"))
-            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
-        else {
-            updateExchangeRate();
-            populateDropDownList();
-            checkDate();
-            restoreCurrencySelectionFromFile();
-        }
+        startupTasks();
 
-        editText.addTextChangedListener(new TextWatcher() {
+        setetCurrency1OnTextChange();
 
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+        setetCurrency2OnTextChange();
 
-            }
+        setCurrency1ListOnItemSelectedListener();
 
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                if (exchangeRate == 0)
-                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
-                else
-                if(editText.isFocused())
-                    if (!( (editText.getText().toString().equals("")) || (editText.getText().toString().equals(".")) ))
-                        setCurr2();
-            }
-
-        });
-
-        editText2.addTextChangedListener(new TextWatcher() {
-
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                if (exchangeRate == 0)
-                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
-                else
-                if(editText2.isFocused())
-                    if (!( (editText2.getText().toString().equals("")) || (editText2.getText().toString().equals(".")) ))
-                        setCurr1();
-            }
-
-        });
-
-        list.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setCurrency1(parent.getItemAtPosition(position).toString());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-        list2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                setCurrency2(parent.getItemAtPosition(position).toString());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
+        setCurrency2ListOnItemSelectedListener();
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-    public void afterTextChanged (Editable s){
-        Toast.makeText(Currency_Converter.this, "did it work", Toast.LENGTH_SHORT).show();
 
+    private void startupTasks() {
+        if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
+            Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        updateExchangeRate();
+        populateDropDownList();
+        checkDate();
+        restoreCurrencySelectionFromFile();
+    }
+
+    public void populateDropDownList(){
+        String currency1 = this.selectedCurrency1, currency2 = this.selectedCurrency2;
+        String[] currencyList = currencyManager.getCurrencyList(); //array of currency, put in listview
+        currencyAdapter1 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
+        currencyAdapter2 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
+        spCurrencyList1.setAdapter(currencyAdapter1);
+        spCurrencyList2.setAdapter(currencyAdapter2);
+
+        for (String c : currencyList){
+            Log.d("Paul",c);
+        }
+
+        currencyManager.setSelectedCurrency1(currency1);
+        currencyManager.setSelectedCurrency2(currency2);
+    }
+
+    private void setCurrency2ListOnItemSelectedListener() {
+        spCurrencyList2.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String currency = parent.getItemAtPosition(position).toString();
+                currencyManager.setSelectedCurrency2(currency);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void setCurrency1ListOnItemSelectedListener() {
+        spCurrencyList1.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String currency = parent.getItemAtPosition(position).toString();
+                currencyManager.setSelectedCurrency1(currency);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+    }
+
+    private void setetCurrency2OnTextChange() {
+        etCurrency2.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+                if (currencyManager.isExchangeRateSet()){
+                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                if(!etCurrency2.isFocused()) return;
+
+                if (!( (etCurrency2.getText().toString().equals("")) || (etCurrency2.getText().toString().equals(".")) )){
+                    calculateCurrency1();
+                }
+            }
+
+        });
+    }
+
+    private void setetCurrency1OnTextChange() {
+        etCurrency1.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) { }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+                if (currencyManager.isExchangeRateSet()){
+                    Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if(!etCurrency1.isFocused()) return;
+
+                if (!( (etCurrency1.getText().toString().equals("")) || (etCurrency1.getText().toString().equals(".")) )){
+                    calculateCurrency2();
+                }
+            }
+
+        });
+    }
+
+    private void setFABAction() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        assert fab != null;
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                swapCurrencies();
+            }
+        });
     }
 
     public void restoreCurrencySelectionFromLocalVariables(){
         if(file.contains("currency1") && (file.contains("currency2"))){
-            if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
-                list.setSelection(listAdapter.getPosition(currency1));
+            if(currencyAdapter1.getPosition(file.getString("currency1", "JMD")) != -1) {
+                spCurrencyList1.setSelection(currencyAdapter1.getPosition(selectedCurrency1));
             }else{
-                list.setSelection(listAdapter.getPosition("JMD"));
+                spCurrencyList1.setSelection(currencyAdapter1.getPosition("JMD"));
             }
-            if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
-                list2.setSelection(list2Adapter.getPosition(currency2));
+            if(currencyAdapter2.getPosition(file.getString("currency2", "USD")) != -1) {
+                spCurrencyList2.setSelection(currencyAdapter2.getPosition(selectedCurrency2));
             }else{
-                list2.setSelection(list2Adapter.getPosition("USD"));
-            }
-        }
-    }
-
-    public void restoreCurrencySelectionFromFile(){
-
-        if(file.contains("currency1") && (file.contains("currency2"))){
-            if(listAdapter.getPosition(file.getString("currency1", "JMD")) != -1) {
-                list.setSelection(listAdapter.getPosition(file.getString("currency1", "JMD")));
-            }else{
-                list.setSelection(listAdapter.getPosition("JMD"));
-            }
-            if(list2Adapter.getPosition(file.getString("currency2", "USD")) != -1) {
-                list2.setSelection(list2Adapter.getPosition(file.getString("currency2", "USD")));
-            }else{
-                list2.setSelection(list2Adapter.getPosition("USD"));
+                spCurrencyList2.setSelection(currencyAdapter2.getPosition("USD"));
             }
         }
-
     }
 
-    public double curr1ToCurr2(double curr1) {
-        return curr1 / exchangeRate;
+    private void restoreCurrencySelectionFromFile(){
+        restoreCurrencySelection1();
+        restoreCurrencySelection2();
     }
 
-    public double curr2ToCurr1(double curr2) {
-        return curr2 * exchangeRate;
+    private void restoreCurrencySelection1(){
+        final int NOT_IN_LIST = -1;
+        String currency = currencyManager.getFirstCurrencySelectionFromFile();
+
+        int currencyPosition = currencyAdapter1.getPosition(currency);
+
+        if(currencyPosition == NOT_IN_LIST) {
+            currencyPosition = currencyAdapter1.getPosition("JMD");
+        }
+
+        spCurrencyList1.setSelection(currencyPosition);
     }
 
-    public void setCurr2() {
-        editText2.setText(String.format("%.2f", curr1ToCurr2(Double.parseDouble(editText.getText().toString()))));
+    private void restoreCurrencySelection2(){
+        final int NOT_IN_LIST = -1;
+        String currency = currencyManager.getSecondCurrencySelectionFromFile();
+
+        int currencyPosition = currencyAdapter2.getPosition(currency);
+
+        if(currencyPosition == NOT_IN_LIST) {
+            currencyPosition = currencyAdapter2.getPosition("JMD");
+        }
+
+        spCurrencyList1.setSelection(currencyPosition);
     }
 
-    public void setCurr1() {
-        editText.setText(String.format("%.2f", curr2ToCurr1(Double.parseDouble(editText2.getText().toString()))));
+    public void calculateCurrency2() {
+        double currency1 = Double.parseDouble(etCurrency1.getText().toString());
+        double currency2 = currencyManager.convertCurrency1ToCurrency2(currency1);
+        setEtCurrency2(currency2);
     }
 
-    public void setCurrency1(String currency){
-        currency1 = currency;
-        updateExchangeRate();
+    public void calculateCurrency1() {
+        double currency2 = Double.parseDouble(etCurrency2.getText().toString());
+        double currency1 = currencyManager.convertCurrency2ToCurrency1(currency2);
+        setEtCurrency1(currency1);
     }
 
-    public void setCurrency2(String currency){
-        currency2 = currency;
-        updateExchangeRate();
+    private void setEtCurrency1(double value){
+        etCurrency1.setText(String.format("%.2f", value);
+    }
+
+    private void setEtCurrency2(double value){
+        etCurrency2.setText(String.format("%.2f", value);
     }
 
     public void swapCurrencies(){
 
-        if (!file.contains("JMD"))
+        if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
             Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
-        else {
-            int tempInt = list.getSelectedItemPosition();
-            list.setSelection(list2.getSelectedItemPosition());
-            list2.setSelection(tempInt);
+            return;
         }
 
-    }
-
-    public boolean saveCurrency1(){
-        return editor.putString("currency1", currency1).commit();
-    }
-
-    public boolean saveCurrency2(){
-        return editor.putString("currency2", currency2).commit();
-    }
-
-    public boolean saveCurrencies(){
-        return (saveCurrency1() && saveCurrency2());
+        int tempInt = spCurrencyList1.getSelectedItemPosition();
+        spCurrencyList1.setSelection(spCurrencyList2.getSelectedItemPosition());
+        spCurrencyList2.setSelection(tempInt);
     }
 
     public String getInfoFromWebsite() throws IOException {
@@ -294,7 +330,7 @@ public class Currency_Converter extends AppCompatActivity {
             in.connect();
             Log.d("Paul", "The response is: " + in.getResponseCode());
             is = in.getInputStream();
-            String inputStream = extractExchangeRate(IOUtils.toString(is, "UTF-8"));
+            String inputStream = extractExchangeRate(IOUtils.toString(is, StandardCharsets.UTF_8));
 
             if (inputStream != null) {
                 Log.d("Paul", "It worked");
@@ -319,7 +355,7 @@ public class Currency_Converter extends AppCompatActivity {
             in.connect();
             Log.d("Paul", "The response is: " + in.getResponseCode());
             is = in.getInputStream();
-            String output = IOUtils.toString(is, "UTF-8");
+            String output = IOUtils.toString(is, StandardCharsets.UTF_8);
             //Log.d("Paul", output);
 
             getCurrencies(output);
@@ -408,16 +444,6 @@ public class Currency_Converter extends AppCompatActivity {
         }
     }
 
-    public Currency getExchangeRate(String currency){
-
-        Currency dollar = new Currency();
-
-        if (file.contains(currency)){
-            dollar.setCurrency(currency);
-            dollar.setRate(Double.parseDouble(file.getString(currency, "0")));
-        }
-        return dollar;
-    }
     @Override
     public void onStart() {
         super.onStart();
@@ -442,7 +468,9 @@ public class Currency_Converter extends AppCompatActivity {
     public void onStop() {
         super.onStop();
 
-        saveCurrencies();
+        if(currencyManager != null){
+            currencyManager.saveCurrencySelection();
+        }
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -477,7 +505,8 @@ public class Currency_Converter extends AppCompatActivity {
 
 
             } catch (IOException e) {
-                Log.d("Paul", "nah it didn't work");
+                Log.e("Paul", e.getMessage());
+                Log.e("Paul", "nah it didn't work");
                 return "false";
             }
         }
@@ -514,14 +543,12 @@ public class Currency_Converter extends AppCompatActivity {
 
         if (id == com.jr.poliv.temperatureconverteralpha.R.id.display_exchange_rate) {
 
-            if (!file.contains("JMD"))
+            if (!currencyManager.doesCurrencyListContainBaseCurrencies()){
                 Toast.makeText(Currency_Converter.this, R.string.update_exchange_rate, Toast.LENGTH_LONG).show();
-            else {
-                checkDate();
-                setDialog(currency1+"$1 = "+currency2+"$ " + exchangeRate);
             }
-
-
+            checkDate();
+            String exchangeRateDisplay = currencyManager.displayExchangeRate();
+            setDialog(exchangeRateDisplay);
         }
 
         return super.onOptionsItemSelected(item);
@@ -608,53 +635,6 @@ public class Currency_Converter extends AppCompatActivity {
 
     }
 
-    public void updateExchangeRate(){
-        exchangeRate = calculateExchangeRate(currency1, currency2);
-    }
-
-    public void populateDropDownList(){
-        String currency1 = this.currency1, currency2 = this.currency2;
-        String[] currencyList = getCurrencies(); //array of currency, put in listview
-        listAdapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
-        list2Adapter = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
-        list.setAdapter(listAdapter);
-        list2.setAdapter(list2Adapter);
-
-        for (String c : currencyList){
-            Log.d("Paul",c);
-        }
-
-        setCurrency1(currency1); setCurrency2(currency2);
-
-    }
-
-    public String[] getCurrencies(){
-        List<String> currencyList = new LinkedList<String>(Arrays.asList(file.getAll().keySet().toArray(new String[0])));
-
-
-        for (Iterator<String> iterator = currencyList.iterator(); iterator.hasNext(); ) {
-            String value = iterator.next();
-            if (value.length() > 3) {
-                iterator.remove();
-            }
-        }
-
-        Collections.sort(currencyList, new Comparator<String>() {
-            @Override
-            public int compare(String s1, String s2) {
-                return s1.compareToIgnoreCase(s2);
-            }
-        });
-
-        String[] currency = currencyList.toArray(new String[0]);
-
-        return currency;
-    }
-
-    public Double calculateExchangeRate(String currency1, String currency2){
-        return ((getExchangeRate(currency2).getRate())/(getExchangeRate(currency1).getRate()));
-    }
-
     private void showProgressBar(){
         progressBar.setVisibility(View.VISIBLE);
     }
@@ -663,7 +643,7 @@ public class Currency_Converter extends AppCompatActivity {
         progressBar.setVisibility(View.GONE);
     }
 
-    public void setDialog(String message) {
+    private void setDialog(String message) {
         Bundle args = new Bundle();
         args.putString("message", message);
         dialog.setArguments(args);

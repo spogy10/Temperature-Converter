@@ -3,8 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Temperature-Converter.iml" filepath="$PROJECT_DIR$/Temperature-Converter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/TemperatureConverter.iml" filepath="$PROJECT_DIR$/TemperatureConverter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Temperature-Converter.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Temperature-Converter.app.iml" />
     </modules>
   </component>
 </project>
