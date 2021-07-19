@@ -2,24 +2,50 @@ package com.jr.poliv.temperatureconverteralpha.classes;
 
 import org.simpleframework.xml.Attribute;
 import org.simpleframework.xml.Element;
+import org.simpleframework.xml.ElementList;
 import org.simpleframework.xml.Root;
 import org.simpleframework.xml.Text;
 
+import java.util.List;
+
 public class BojFeed {
     @Root
-    @Namespace(reference="http://www.w3.org/2005/Atom", prefix="atom")
-    public class Rss {
+    public static class Rss {
+
+        @Attribute
+        private String version;
+
         @Element
         private Channel channel;
 
         public Channel getChannel() {
             return channel;
         }
+
+        public String getVersion() {
+            return version;
+        }
     }
 
-    public class Channel {
+    public static class Channel {
+
+        @Element
+        private String lastBuildDate;
+
+        @Element
+        private String pubDate;
+
+        @Element
+        private String title;
+
+        @ElementList(entry="link", inline=true)
+        private List<String> link;
+
         @Element
         private String description;
+
+        @Element
+        private String webMaster;
 
         @Element
         private Item item;
@@ -31,9 +57,25 @@ public class BojFeed {
         public Item getItem() {
             return item;
         }
+
+        public String getLastBuildDate() {
+            return lastBuildDate;
+        }
+
+        public String getPubDate() {
+            return pubDate;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getWebMaster() {
+            return webMaster;
+        }
     }
 
-    public class Item{
+    public static class Item{
         @Element
         private String title;
 
@@ -70,7 +112,7 @@ public class BojFeed {
         }
     }
 
-    public class Guid{
+    public static class Guid{
         @Attribute
         private boolean isPermaLink;
 
