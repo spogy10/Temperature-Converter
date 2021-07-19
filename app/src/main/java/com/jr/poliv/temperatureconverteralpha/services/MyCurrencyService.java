@@ -229,7 +229,7 @@ public class MyCurrencyService implements CurrencyService {
 
             JSONArray names = j2.names();
 
-            double eurToUsd = Double.parseDouble(j2.getString(USD_KEY);
+            double eurToUsd = Double.parseDouble(j2.getString(USD_KEY));
 
             SharedPreferences.Editor editor = prepareEditor();
 
