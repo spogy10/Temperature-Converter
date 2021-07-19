@@ -4,11 +4,16 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.jr.poliv.temperatureconverteralpha.Currency;
+import com.jr.poliv.temperatureconverteralpha.R;
+import com.jr.poliv.temperatureconverteralpha.TemperatureConverter;
+import com.jr.poliv.temperatureconverteralpha.classes.BojFeed;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.simpleframework.xml.Serializer;
+import org.simpleframework.xml.core.Persister;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,15 +32,22 @@ import java.util.Map;
 public class MyCurrencyService implements CurrencyService {
 
     private final SharedPreferences file;
-    private final String JMD_KEY = "JMD";
-    private final String USD_KEY = "USD";
-    private final String FIRST_CURRENCY_KEY = "currency1";
-    private final String SECOND_CURRENCY_KEY = "currency2";
-    private final String DATE_LAST_UPDATED_KEY = "date last updated";
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+    private final String JMD_KEY = getConfig(R.string.jmd_key);
+    private final String USD_KEY = getConfig(R.string.usd_key);
+    private final String FIRST_CURRENCY_KEY = getConfig(R.string.first_currency);
+    private final String SECOND_CURRENCY_KEY = getConfig(R.string.second_currency);
+    private final String DATE_LAST_UPDATED_KEY = getConfig(R.string.date_last_updated);
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(getConfig(R.string.date_format));
+    private final String BOJ_RSS_FEED_URL = getConfig(R.string.boj_rss_feed_url);
+    private final String CURRENCY_API_URL = getConfig(R.string.currency_api_url);
+
 
     public MyCurrencyService(SharedPreferences file){
         this.file = file;
+    }
+
+    private String getConfig(int keyId){
+        return TemperatureConverter.getInstance().getString(key);
     }
 
     @Override
@@ -134,8 +146,28 @@ public class MyCurrencyService implements CurrencyService {
         return false;
     }
 
-    private String getJmdExchangeRate(){
+    private String getJmdExchangeRate() throws IOException {
         //todo: insert code to get jmd rate from boj
+        //get sales rate
+        //I NEED TO RUN THIS PART TO SEE IF IT WORKS
+        String bojFeed = retrieveWebContent(BOJ_RSS_FEED_URL);
+        BojFeed.Rss rssFeed = deserializeBojFeed();
+        return extractJmdExchangeRate(rssFeed);
+    }
+
+    private String extractJmdExchangeRate(BojFeed.Rss rssFeed){
+        String rates = rssFeed.getChannel().getItem().getDescription();
+        return extractJmdExchangeRateFromDescription(rates);
+    }
+
+    private String extractJmdExchangeRateFromDescription(String rates){
+        Log.d("Extracting di ting", rates);
+        return "";
+    }
+
+    private void deserializeBojFeed(String bojFeed){
+        Serializer serializer = new Persister();
+        return serializer.read(BojFeed.Rss.class, bojFeed);
     }
 
     private void saveDefaultCurrencies(String jmdExchangeRateString){
@@ -165,14 +197,14 @@ public class MyCurrencyService implements CurrencyService {
     }
 
     private void getAndSaveExchangeRates() throws IOException {
-        String currencyApiResult = getExchangeRates();
+        String currencyApiResult = retrieveWebContent(CURRENCY_API_URL);
         processAndSaveCurrencies(currencyApiResult);
     }
 
-    private String getExchangeRates() throws IOException {
+    private String retrieveWebContent(String url) throws IOException{
         InputStream is = null;
         try{
-            URL url = new URL("http://data.fixer.io/api/latest?access_key=90fb7ac8a78ad68ec1f6636c1317e439"); //http://api.fixer.io/latest?base=USD
+            URL url = new URL(url);
             HttpURLConnection in = (HttpURLConnection) url.openConnection();
             in.setReadTimeout(10000 /* milliseconds */);
             in.setConnectTimeout(15000 /* milliseconds */);
@@ -193,11 +225,11 @@ public class MyCurrencyService implements CurrencyService {
             JSONObject jObject = new JSONObject(result);
             JSONObject j2 = new JSONObject(jObject.getString("rates"));
 
-            j2.remove("JMD");
+            j2.remove(JMD_KEY);
 
             JSONArray names = j2.names();
 
-            double eurToUsd = Double.parseDouble(j2.getString("USD"));
+            double eurToUsd = Double.parseDouble(j2.getString(USD_KEY);
 
             SharedPreferences.Editor editor = prepareEditor();
 

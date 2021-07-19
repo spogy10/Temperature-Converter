@@ -27,6 +27,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-appindexing:20.0.0'
     implementation 'commons-io:commons-io:2.6'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'org.simpleframework:simple-xml:2.7.1'
 }
 
 

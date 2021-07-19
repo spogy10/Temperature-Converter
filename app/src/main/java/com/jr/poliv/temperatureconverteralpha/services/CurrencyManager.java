@@ -3,6 +3,7 @@ package com.jr.poliv.temperatureconverteralpha.services;
 import android.content.SharedPreferences;
 
 import com.jr.poliv.temperatureconverteralpha.Currency;
+import com.jr.poliv.temperatureconverteralpha.TemperatureConverter;
 
 public class CurrencyManager {
 
@@ -15,7 +16,8 @@ public class CurrencyManager {
 
     public CurrencyManager(SharedPreferences file){
         currencyService = new MyCurrencyService(file);
-        selectedCurrency1 = "JMD"; selectedCurrency2 = "USD";
+        selectedCurrency1 = TemperatureConverter.getInstance().getString(R.string.default_currency_1);
+        selectedCurrency2 = TemperatureConverter.getInstance().getString(R.string.default_currency_2);
         updateExchangeRate();
     }
 
