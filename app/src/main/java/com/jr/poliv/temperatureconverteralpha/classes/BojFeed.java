@@ -19,12 +19,12 @@ public class BojFeed {
 
     public class Channel {
         @Element
-        private string description;
+        private String description;
 
         @Element
         private Item item;
 
-        public string getDescription() {
+        public String getDescription() {
             return description;
         }
 
@@ -35,33 +35,33 @@ public class BojFeed {
 
     public class Item{
         @Element
-        private string title;
+        private String title;
 
         @Element
-        private string link;
+        private String link;
 
         @Element
-        private string description;
+        private String description;
 
         @Element
-        private string pubDate;
+        private String pubDate;
 
         @Element
         private Guid guid;
 
-        public string getTitle() {
+        public String getTitle() {
             return title;
         }
 
-        public string getLink() {
+        public String getLink() {
             return link;
         }
 
-        public string getDescription() {
+        public String getDescription() {
             return description;
         }
 
-        public string getPubDate() {
+        public String getPubDate() {
             return pubDate;
         }
 
@@ -75,13 +75,13 @@ public class BojFeed {
         private boolean isPermaLink;
 
         @Text
-        private string value;
+        private String value;
 
         public boolean isPermaLink() {
             return isPermaLink;
         }
 
-        public string getValue() {
+        public String getValue() {
             return value;
         }
     }
