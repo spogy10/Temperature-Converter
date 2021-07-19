@@ -201,10 +201,10 @@ public class MyCurrencyService implements CurrencyService {
         processAndSaveCurrencies(currencyApiResult);
     }
 
-    private String retrieveWebContent(String url) throws IOException{
+    private String retrieveWebContent(String urlString) throws IOException{
         InputStream is = null;
         try{
-            URL url = new URL(url);
+            URL url = new URL(urlString);
             HttpURLConnection in = (HttpURLConnection) url.openConnection();
             in.setReadTimeout(10000 /* milliseconds */);
             in.setConnectTimeout(15000 /* milliseconds */);
