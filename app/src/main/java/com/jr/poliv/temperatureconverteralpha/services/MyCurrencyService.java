@@ -47,7 +47,7 @@ public class MyCurrencyService implements CurrencyService {
     }
 
     private String getConfig(int keyId){
-        return TemperatureConverter.getInstance().getString(key);
+        return TemperatureConverter.getInstance().getString(keyId);
     }
 
     @Override
@@ -142,17 +142,22 @@ public class MyCurrencyService implements CurrencyService {
         } catch (IOException e) {
             Log.e("Paul", e.getMessage());
             Log.e("Paul", "nah it didn't work");
+        } catch(Exception e){
+            Log.e("Paul", e.getMessage());
+            Log.e("Paul", "nah it didn't work");
         }
         return false;
     }
 
-    private String getJmdExchangeRate() throws IOException {
-        //todo: insert code to get jmd rate from boj
-        //get sales rate
-        //I NEED TO RUN THIS PART TO SEE IF IT WORKS
+    private String getJmdExchangeRate() throws Exception {
         String bojFeed = retrieveWebContent(BOJ_RSS_FEED_URL);
-        BojFeed.Rss rssFeed = deserializeBojFeed();
+        BojFeed.Rss rssFeed = deserializeBojFeed(bojFeed);
         return extractJmdExchangeRate(rssFeed);
+    }
+
+    private BojFeed.Rss deserializeBojFeed(String bojFeed) throws Exception{
+        Serializer serializer = new Persister();
+        return serializer.read(BojFeed.Rss.class, bojFeed);
     }
 
     private String extractJmdExchangeRate(BojFeed.Rss rssFeed){
@@ -161,13 +166,11 @@ public class MyCurrencyService implements CurrencyService {
     }
 
     private String extractJmdExchangeRateFromDescription(String rates){
-        Log.d("Extracting di ting", rates);
-        return "";
-    }
-
-    private void deserializeBojFeed(String bojFeed){
-        Serializer serializer = new Persister();
-        return serializer.read(BojFeed.Rss.class, bojFeed);
+        String beginingPositionMarker = "USD Selling ";
+        String endingPostitionMarker = " CAD Buying Rate ";
+        int beginingPositionIndex = rates.indexOf(beginingPositionMarker) + beginingPositionMarker.length();
+        int endindPositionIndex = rates.indexOf(endingPostitionMarker);
+        return rates.substring(beginingPositionIndex, endindPositionIndex);
     }
 
     private void saveDefaultCurrencies(String jmdExchangeRateString){
