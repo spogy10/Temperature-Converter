@@ -30,28 +30,20 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.jr.poliv.temperatureconverteralpha.services.CurrencyManager;
+import com.jr.poliv.temperatureconverteralpha.services.UpdateExchangeRateResult;
 
 import org.apache.commons.io.IOUtils;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 
-public class CurrencyConverter extends AppCompatActivity {
+public class CurrencyConverter extends AppCompatActivity implements UpdateExchangeRateResult {
 
-    CurrencyManager currencyManager;
-
-    public String dataFromAsyncTask = "0";
-
-    public String folder_name;
+    private CurrencyManager currencyManager;
+    private String folder_name;
 
     EditText etCurrency1, etCurrency2;
     Spinner spCurrencyList1, spCurrencyList2;
@@ -92,7 +84,7 @@ public class CurrencyConverter extends AppCompatActivity {
 
         SharedPreferences file = this.getSharedPreferences(folder_name, Context.MODE_PRIVATE);
 
-        currencyManager = new CurrencyManager(file);
+        currencyManager = new CurrencyManager(this, file);
 
         startupTasks();
 
@@ -115,13 +107,16 @@ public class CurrencyConverter extends AppCompatActivity {
             return;
         }
 
-        currencyManager.updateExchangeRate();
-        populateDropDownList();
+        populateDropDownListAndRestoreSelectedCurrencies();
         checkDate();
+    }
+
+    private void populateDropDownListAndRestoreSelectedCurrencies(){
+        populateDropDownList();
         restoreCurrencySelectionFromFile();
     }
 
-    public void populateDropDownList(){
+    private void populateDropDownList(){
         String[] currencyList = currencyManager.getCurrencyList(); //array of currency, put in listview
         currencyAdapter1 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
         currencyAdapter2 = new ArrayAdapter<String>(this, R.layout.spinner_item, currencyList);
@@ -257,7 +252,7 @@ public class CurrencyConverter extends AppCompatActivity {
             currencyPosition = currencyAdapter2.getPosition("JMD");
         }
 
-        spCurrencyList1.setSelection(currencyPosition);
+        spCurrencyList2.setSelection(currencyPosition);
     }
 
     private void calculateCurrency2() {
@@ -395,121 +390,40 @@ public class CurrencyConverter extends AppCompatActivity {
         }
     }
 
-    private void updateExchangeRate() {
+    public void updateCurrencyExchangeRates() {
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if (networkInfo != null && networkInfo.isConnected()) {
             showProgressBar();
-            currencyManager.updateExchangeRate();
-            populateDropDownList();
-            restoreCurrencySelectionFromFile();
-
+            currencyManager.updateCurrencyExchangeRates();
         } else {
             setDialog("No Network Connection");
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-    public String getInfoFromWebsite() throws IOException {
-        InputStream is = null;
-        try {
-            URL url = new URL("https://www.boj.org.jm/foreign_exchange/fx_trading_summary.php");
-            HttpURLConnection in = (HttpURLConnection) url.openConnection();
-            in.setReadTimeout(10000 /* milliseconds */);
-            in.setConnectTimeout(15000 /* milliseconds */);
-            in.setRequestMethod("GET");
-            in.setDoInput(true);
-            in.connect();
-            Log.d("Paul", "The response is: " + in.getResponseCode());
-            is = in.getInputStream();
-            String inputStream = extractExchangeRate(IOUtils.toString(is, StandardCharsets.UTF_8));
-
-            if (inputStream != null) {
-                Log.d("Paul", "It worked");
+    @Override
+    public void onSuccessfulUpdate(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                populateDropDownListAndRestoreSelectedCurrencies();
+                hideProgressBar();
+                Toast.makeText(CurrencyConverter.this, R.string.success, Toast.LENGTH_SHORT).show();
             }
-            return inputStream;
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-        }
+        });
     }
 
-//    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
-//        Reader reader;
-//        reader = new InputStreamReader(stream, "UTF-8");
-//        Log.d("Paul", String.valueOf(stream.markSupported()));
-//        char[] buffer = new char[len];
-//        reader.read(buffer);
-//        return new String(buffer);
-//    }
-
-    public static String extractExchangeRate(String string) {
-        String intro = "<b>10-DAY MOVING AVERAGE RATE</b></td>\n" +
-                "                          </tr>\n" +
-                "                          <tr>\n" +
-                "                            <td  width=\"11%\"><b>CURRENCY</b></td>\n" +
-                "                            <td align=\"center\" width=\"44.5%\"><b>PURCHASE</b></td>\n" +
-                "                            <td align=\"center\" width=\"44.5%\"><b>SALES</b></td>\n" +
-                "                          </tr>\n" +
-                "                          \n" +
-                "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">";
-
-        String intro2 = "<b>10-DAY MOVING AVERAGE RATE</b></td>\n" +
-                "                          </tr>\n" +
-                "                          <tr>\n" +
-                "                            <td  width=\"11%\"><b>CURRENCY</b></td>\n" +
-                "                            <td align=\"center\" width=\"44.5%\"><b>PURCHASE</b></td>\n" +
-                "                            <td align=\"center\" width=\"44.5%\"><b>SALES</b></td>\n" +
-                "                          </tr>\n" +
-                "                          \n" +
-                "\t\t\t\t\t<tr><td >USD</td><td align=\"right\">129.1550</td><td align=\"right\">";
-
-    string = string.substring(string.indexOf(intro));
-    return string.substring(intro2.length(), intro2.length() + 8);
-}
-
-
-
-
-    public class ReadFromWebsite extends AsyncTask<Void, Void, String> {
-
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try{
-                String JMD = getInfoFromWebsite();
-                Currency ja = new Currency("JMD", (1/Double.parseDouble(JMD))), usa = new Currency("USD", Double.parseDouble("1"));
-                return "true";
-
-
-
-            } catch (IOException e) {
-                Log.e("Paul", e.getMessage());
-                Log.e("Paul", "nah it didn't work");
-                return "false";
+    @Override
+    public void onUpdateFailure(){
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                hideProgressBar();
+                Toast.makeText(CurrencyConverter.this, R.string.error_getting_rates, Toast.LENGTH_SHORT).show();
             }
-        }
-
-        protected void onPostExecute(String result) {
-            Log.d("Paul", "Result is " + result);
-            hideProgressBar();
-            update(result);
-        }
-
-
+        });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -526,7 +440,7 @@ public class CurrencyConverter extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == com.jr.poliv.temperatureconverteralpha.R.id.update_exchange_rate) {
-            update();
+            updateCurrencyExchangeRates();
             return true;
         }
 
@@ -542,43 +456,4 @@ public class CurrencyConverter extends AppCompatActivity {
 
         return super.onOptionsItemSelected(item);
     }
-
-    private void update(String result){
-        dataFromAsyncTask = result;
-        Log.d("Paul", "The file name is " + "JMD");
-        Log.d("Paul", "Exchange rate successful " + dataFromAsyncTask);
-        if (dataFromAsyncTask.equals("true")) {
-            Toast.makeText(this, R.string.success, Toast.LENGTH_SHORT).show();
-            populateDropDownList();
-        }else{
-            Toast.makeText(this, R.string.error_getting_rates, Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    public void update(){
-
-            ConnectivityManager connMgr = (ConnectivityManager)
-                    getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            if (networkInfo != null && networkInfo.isConnected()) {
-                //try {
-                showProgressBar();
-                    new ReadFromWebsite().execute();
-                /*} catch (InterruptedException e) {
-                    setDialog("Update Failed");
-                    Log.d("Paul", String.valueOf(e));
-                } catch (ExecutionException e) {
-                    setDialog("Update Failed");
-                    Log.d("Paul", String.valueOf(e));
-                } catch (TimeoutException e) {
-                    setDialog("System Timed Out");
-                    Log.d("Paul", String.valueOf(e));
-                }*/
-
-            } else
-                setDialog("No Network Connection");
-
-    }
-
-
 }

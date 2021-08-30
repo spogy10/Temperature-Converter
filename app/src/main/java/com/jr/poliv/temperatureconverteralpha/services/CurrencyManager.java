@@ -5,16 +5,19 @@ import android.content.SharedPreferences;
 import com.jr.poliv.temperatureconverteralpha.Currency;
 import com.jr.poliv.temperatureconverteralpha.TemperatureConverter;
 
+import java.util.concurrent.ExecutorService;
+
 public class CurrencyManager {
 
     private final CurrencyService currencyService;
-    private Currency[] currencies = null;
     private double exchangeRate = 0;
     private String selectedCurrency1, selectedCurrency2;
+    private UpdateExchangeRateResult exchangeRateResult;
 
 
 
-    public CurrencyManager(SharedPreferences file){
+    public CurrencyManager(UpdateExchangeRateResult exchangeRateResult, SharedPreferences file){
+        this.exchangeRateResult = exchangeRateResult;
         currencyService = new MyCurrencyService(file);
         selectedCurrency1 = getFirstCurrencySelectionFromFile();
         selectedCurrency2 = getSecondCurrencySelectionFromFile();
@@ -75,8 +78,15 @@ public class CurrencyManager {
         return selectedCurrency1 +"$1 = "+ selectedCurrency2 +"$ " + exchangeRate;
     }
 
-    public boolean updateExchangeRate(){
-        return currencyService.updateExchangeRate();
+    public void updateCurrencyExchangeRates(){
+        ExecutorService executor = TemperatureConverter.getExecutorService();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                boolean response = currencyService.updateCurrencyExchangeRates();
+                updateCurrencyExchangeRatesResult(response);
+            }
+        });
     }
 
     public boolean shouldShowUpdateMessageBasedOnLastUpdate(){
@@ -89,6 +99,15 @@ public class CurrencyManager {
 
 
 
+    private void updateCurrencyExchangeRatesResult(boolean result){
+        if(result){
+            calculateExchangeRate();
+            exchangeRateResult.onSuccessfulUpdate();
+            return;
+        }
+
+        exchangeRateResult.onUpdateFailure();
+    }
 
     private void calculateExchangeRate(){
         exchangeRate = calculateExchangeRate(selectedCurrency1, selectedCurrency2);

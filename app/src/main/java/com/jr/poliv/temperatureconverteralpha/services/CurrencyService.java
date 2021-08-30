@@ -9,7 +9,7 @@ public interface CurrencyService {
     boolean doesCurrencyExist(String currency);
     boolean doesCurrencyListContainBaseCurrencies();
     double getCurrencyRate(String currency);
-    boolean updateExchangeRate();
+    boolean updateCurrencyExchangeRates();
     boolean saveCurrencySelection(String currency1, String currency2);
     String getFirstCurrencySelectionFromFile();
     String getSecondCurrencySelectionFromFile();

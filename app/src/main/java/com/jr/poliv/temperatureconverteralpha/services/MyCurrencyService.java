@@ -156,7 +156,7 @@ public class MyCurrencyService implements CurrencyService {
     }
 
     @Override
-    public boolean updateExchangeRate() {
+    public boolean updateCurrencyExchangeRates() {
         try {
             String jmdExchangeRate = getJmdExchangeRate();
             saveDefaultCurrencies(jmdExchangeRate);

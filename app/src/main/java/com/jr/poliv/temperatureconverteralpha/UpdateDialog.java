@@ -21,7 +21,7 @@ public class UpdateDialog extends DialogFragment {
                 .setPositiveButton("Update",
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int boss) {
-                                ((CurrencyConverter)getActivity()).update();
+                                ((CurrencyConverter)getActivity()).updateCurrencyExchangeRates();
                             }
                         }
                 )
