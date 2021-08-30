@@ -13,5 +13,6 @@ public interface CurrencyService {
     boolean saveCurrencySelection(String currency1, String currency2);
     String getFirstCurrencySelectionFromFile();
     String getSecondCurrencySelectionFromFile();
+    boolean checkDate();
     String[] getCurrencyList();
 }

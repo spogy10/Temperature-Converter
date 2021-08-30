@@ -1,11 +1,16 @@
 package com.jr.poliv.temperatureconverteralpha.services;
 
+import android.app.DialogFragment;
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.util.Log;
 
 import com.jr.poliv.temperatureconverteralpha.Currency;
 import com.jr.poliv.temperatureconverteralpha.R;
 import com.jr.poliv.temperatureconverteralpha.TemperatureConverter;
+import com.jr.poliv.temperatureconverteralpha.UpdateDialog;
 import com.jr.poliv.temperatureconverteralpha.classes.BojFeed;
 
 import org.apache.commons.io.IOUtils;
@@ -20,8 +25,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -37,6 +44,7 @@ public class MyCurrencyService implements CurrencyService {
     private final String FIRST_CURRENCY_KEY = getConfig(R.string.first_currency);
     private final String SECOND_CURRENCY_KEY = getConfig(R.string.second_currency);
     private final String DATE_LAST_UPDATED_KEY = getConfig(R.string.date_last_updated);
+    private final int DAYS_TILL_NEXT_CURRENCY_CHECK = Integer.parseInt(getConfig(R.string.days_till_next_currency_check));//10
     private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(getConfig(R.string.date_format));
     private final String BOJ_RSS_FEED_URL = getConfig(R.string.boj_rss_feed_url);
     private final String CURRENCY_API_URL = getConfig(R.string.currency_api_url);
@@ -129,6 +137,22 @@ public class MyCurrencyService implements CurrencyService {
         }
 
         return saveEdits(editor);
+    }
+
+    @Override
+    public boolean checkDate(){
+        try {
+            Date lastCheck = DATE_FORMAT.parse(file.getString(DATE_LAST_UPDATED_KEY, "01-01-2000"));
+            Calendar c = Calendar.getInstance();
+            c.setTime(lastCheck);
+            c.add(Calendar.DATE, 10);
+            lastCheck = new Date(c.getTimeInMillis());
+            Date currentDate = new Date();
+            return currentDate.after(lastCheck);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     @Override

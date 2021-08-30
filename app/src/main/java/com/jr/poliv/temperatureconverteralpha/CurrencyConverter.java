@@ -115,7 +115,7 @@ public class CurrencyConverter extends AppCompatActivity {
             return;
         }
 
-        updateExchangeRate();
+        currencyManager.updateExchangeRate();
         populateDropDownList();
         checkDate();
         restoreCurrencySelectionFromFile();
@@ -375,33 +375,55 @@ public class CurrencyConverter extends AppCompatActivity {
         }
     }
 
+    private void checkDate(){
+        try {
+            boolean showUpdateMessage = currencyManager.shouldShowUpdateMessageBasedOnLastUpdate();
 
-
-
-
-
-
-
-    public void restoreCurrencySelectionFromLocalVariables(){
-        if(file.contains("currency1") && (file.contains("currency2"))){
-            if(currencyAdapter1.getPosition(file.getString("currency1", "JMD")) != -1) {
-                spCurrencyList1.setSelection(currencyAdapter1.getPosition(selectedCurrency1));
-            }else{
-                spCurrencyList1.setSelection(currencyAdapter1.getPosition("JMD"));
+            if (showUpdateMessage){
+                ConnectivityManager connMgr = (ConnectivityManager)
+                        getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                if (networkInfo != null && networkInfo.isConnected()){
+                    DialogFragment newFragment = new UpdateDialog();
+                    newFragment.show(getFragmentManager(), "dialog");
+                }
             }
-            if(currencyAdapter2.getPosition(file.getString("currency2", "USD")) != -1) {
-                spCurrencyList2.setSelection(currencyAdapter2.getPosition(selectedCurrency2));
-            }else{
-                spCurrencyList2.setSelection(currencyAdapter2.getPosition("USD"));
-            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
+
+    private void updateExchangeRate() {
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            showProgressBar();
+            currencyManager.updateExchangeRate();
+            populateDropDownList();
+            restoreCurrencySelectionFromFile();
+
+        } else {
+            setDialog("No Network Connection");
+        }
+    }
+
+
+
+
+
+
+
+
+
 
 
     public String getInfoFromWebsite() throws IOException {
         InputStream is = null;
         try {
-            URL url = new URL("http://www.boj.org.jm/foreign_exchange/fx_trading_summary.php");
+            URL url = new URL("https://www.boj.org.jm/foreign_exchange/fx_trading_summary.php");
             HttpURLConnection in = (HttpURLConnection) url.openConnection();
             in.setReadTimeout(10000 /* milliseconds */);
             in.setConnectTimeout(15000 /* milliseconds */);
@@ -421,66 +443,6 @@ public class CurrencyConverter extends AppCompatActivity {
                 is.close();
             }
         }
-    }
-
-    public void getExchangeRates() throws IOException{
-        InputStream is = null;
-        try{
-            URL url = new URL("http://data.fixer.io/api/latest?access_key=90fb7ac8a78ad68ec1f6636c1317e439"); //http://api.fixer.io/latest?base=USD
-            HttpURLConnection in = (HttpURLConnection) url.openConnection();
-            in.setReadTimeout(10000 /* milliseconds */);
-            in.setConnectTimeout(15000 /* milliseconds */);
-            in.setRequestMethod("GET");
-            in.setDoInput(true);
-            in.connect();
-            Log.d("Paul", "The response is: " + in.getResponseCode());
-            is = in.getInputStream();
-            String output = IOUtils.toString(is, StandardCharsets.UTF_8);
-            //Log.d("Paul", output);
-
-            getCurrencies(output);
-
-
-        } finally{
-            if (is != null)
-                is.close();
-        }
-    }
-
-    public  void getCurrencies(String result){
-        try {
-            JSONObject jObject = new JSONObject(result);
-            JSONObject j2 = new JSONObject(jObject.getString("rates"));
-
-            j2.remove("JMD");
-
-            JSONArray names = j2.names();
-
-            double eurToUsd = Double.parseDouble(j2.getString("USD"));
-
-            Currency[] currencies = new Currency[names.length()];
-
-            for(int i = 0; i < names.length(); i++){
-                currencies[i] = new Currency(names.getString(i), ( eurToUsd / Double.parseDouble(j2.getString(names.getString(i)))));
-                Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(i) + " = " + j2.getString(names.getString(i)) + "; reverse usd value = "+ currencies[i].getRate());
-            }
-
-
-
-            setCurrencies(currencies);
-
-
-            //String aJsonString = j2.getString("BRL");
-            //Log.d("Paul", "THIS IS THE STRING"+ " " + names.getString(0).toString()); //returns first currency name
-        } catch (JSONException e) {
-            Log.d("Paul", "THIS IS NOT THE STRING"+e.toString());
-            e.printStackTrace();
-        }
-
-    }
-
-    public void setCurrencies(Currency[] currencies){
-        this.currencies = currencies;
     }
 
 //    public String readIt(InputStream stream, int len) throws IOException, UnsupportedEncodingException {
@@ -517,13 +479,6 @@ public class CurrencyConverter extends AppCompatActivity {
     return string.substring(intro2.length(), intro2.length() + 8);
 }
 
-    public void saveExchangeRate(Currency dollar){ //saves currency to file
-        editor = file.edit();
-        if (editor.putString(dollar.getCurrency(), String.valueOf(dollar.getRate())).commit()) {
-            Log.d("Paul", dollar.getCurrency() + " = " + dollar.getRate() + " has been written to file");
-        }
-    }
-
 
 
 
@@ -535,9 +490,6 @@ public class CurrencyConverter extends AppCompatActivity {
             try{
                 String JMD = getInfoFromWebsite();
                 Currency ja = new Currency("JMD", (1/Double.parseDouble(JMD))), usa = new Currency("USD", Double.parseDouble("1"));
-                saveExchangeRate(ja);
-                saveExchangeRate(usa);
-                getExchangeRates();
                 return "true";
 
 
@@ -591,59 +543,15 @@ public class CurrencyConverter extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    boolean checkDate(){
-
-        try {
-            Date lastCheck = dateFormat.parse(file.getString(date_last_updated, "01-01-2000"));
-            Calendar c = Calendar.getInstance();
-            c.setTime(lastCheck);
-            c.add(Calendar.DATE, 10);
-            lastCheck = new Date(c.getTimeInMillis());
-
-            if (new Date().after(lastCheck)){
-                ConnectivityManager connMgr = (ConnectivityManager)
-                        getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-                if (networkInfo != null && networkInfo.isConnected()){
-                    DialogFragment newFragment = new UpdateDialog();
-                    newFragment.show(getFragmentManager(), "dialog");
-
-
-
-                }
-            }
-
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return true;
-    }
-
     private void update(String result){
         dataFromAsyncTask = result;
         Log.d("Paul", "The file name is " + "JMD");
         Log.d("Paul", "Exchange rate successful " + dataFromAsyncTask);
         if (dataFromAsyncTask.equals("true")) {
-            updateExchangeRate();
-            Log.d("Paul", "The Exchange rate variable has been changed to " + String.format("%.4f", exchangeRate));
-
-            Date current = new Date();
-            editor = file.edit();
-
-            if (editor.putString(date_last_updated, dateFormat.format(current)).commit())
-                Log.d("Paul", "date written to file");
             Toast.makeText(this, R.string.success, Toast.LENGTH_SHORT).show();
+            populateDropDownList();
         }else{
             Toast.makeText(this, R.string.error_getting_rates, Toast.LENGTH_SHORT).show();
-        }
-
-        if (currencies != null){
-            for (Currency currency : currencies)
-                saveExchangeRate(currency);
-            currencies = null;
-            populateDropDownList();
-            restoreCurrencySelectionFromLocalVariables();
         }
     }
 

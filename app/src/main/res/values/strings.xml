@@ -20,8 +20,15 @@
     <string name="folder_name">com.jr.poliv.temperatureconverter</string>
     <string name="file_name">com.jr.poliv.temperatureconverter.Exchange_Rate</string>
     <string name="title_activity_main">Currency Converter</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name= "date_last_updated">date last updated</string>
+    <string name="date_format">dd-MM-yyyy</string>
+    <string name="days_till_next_currency_check">10</string>
+    <string name="jmd_key">JMD</string>
+    <string name="usd_key">USD</string>
+    <string name="first_currency">currency1</string>
+    <string name="second_currency">currency2</string>
+    <string name="boj_rss_feed_url">https://boj.org.jm/feed/?feed=fxrates</string>
+    <string name="currency_api_url">http://data.fixer.io/api/latest?access_key=90fb7ac8a78ad68ec1f6636c1317e439</string>
 
     <string name="error_getting_rates">Error getting exchange rates. Please inform developer</string>
     <string name="success">Success</string>

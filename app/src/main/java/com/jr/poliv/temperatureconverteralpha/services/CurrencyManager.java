@@ -16,9 +16,9 @@ public class CurrencyManager {
 
     public CurrencyManager(SharedPreferences file){
         currencyService = new MyCurrencyService(file);
-        selectedCurrency1 = TemperatureConverter.getInstance().getString(R.string.default_currency_1);
-        selectedCurrency2 = TemperatureConverter.getInstance().getString(R.string.default_currency_2);
-        updateExchangeRate();
+        selectedCurrency1 = getFirstCurrencySelectionFromFile();
+        selectedCurrency2 = getSecondCurrencySelectionFromFile();
+        calculateExchangeRate();
     }
 
     public String[] getCurrencyList(){
@@ -31,7 +31,7 @@ public class CurrencyManager {
 
     public void setSelectedCurrency1(String currency){
         selectedCurrency1 = currency;
-        updateExchangeRate();
+        calculateExchangeRate();
     }
 
     public String getSelectedCurrency2(){
@@ -40,7 +40,7 @@ public class CurrencyManager {
 
     public void setSelectedCurrency2(String currency){
         selectedCurrency2 = currency;
-        updateExchangeRate();
+        calculateExchangeRate();
     }
 
     public String getFirstCurrencySelectionFromFile(){
@@ -75,6 +75,13 @@ public class CurrencyManager {
         return selectedCurrency1 +"$1 = "+ selectedCurrency2 +"$ " + exchangeRate;
     }
 
+    public boolean updateExchangeRate(){
+        return currencyService.updateExchangeRate();
+    }
+
+    public boolean shouldShowUpdateMessageBasedOnLastUpdate(){
+        return currencyService.checkDate();
+    }
 
 
 
@@ -82,7 +89,8 @@ public class CurrencyManager {
 
 
 
-    private void updateExchangeRate(){
+
+    private void calculateExchangeRate(){
         exchangeRate = calculateExchangeRate(selectedCurrency1, selectedCurrency2);
     }
 
